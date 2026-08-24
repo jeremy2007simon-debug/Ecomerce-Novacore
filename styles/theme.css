@@ -1,0 +1,151 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   ATLANTIC SUPPLY — DESIGN TOKENS
+   Tailwind CSS v4. There is deliberately NO tailwind.config.js: in v4 a config
+   file is ignored unless explicitly @config'd, so having one that half-works is
+   worse than having none. Every token lives here and becomes a real CSS custom
+   property, which is what the ProductVisual colorway system consumes directly.
+
+   v3 → v4 reminders for anyone editing this file:
+     • `@layer utilities { .x { @apply … } }`  →  `@utility x { … }`
+     • `bg-opacity-50`                          →  `bg-black/50`
+     • default border color is now `currentColor`, NOT gray-200 (see globals.css)
+     • `shadow-sm` shifted down the scale to `shadow-xs`
+     • dynamic class names (`text-${size}`) still do not exist — use a CSS var
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── COLOR ────────────────────────────────────────────────────────────────
+     OKLCH throughout: perceptually uniform, so a lightness step looks like the
+     same step at every hue. The palette is a near-monochrome basalt ramp with
+     exactly two accents, each of which has a job:
+       ember    → volcanic heat. Signals the brand's origin. Used for the ONE
+                  primary action in a viewport, and for warm rim-light in art.
+       atlantic → cold ocean. Used only for informational/system states so it
+                  never competes with ember for the eye.
+     Anything that is not those two is a value, not a colour.                  */
+
+  --color-void: oklch(0.1183 0.0058 264.53);
+  --color-abyss: oklch(0.1554 0.0062 264.53);
+  --color-basalt: oklch(0.2087 0.0067 264.53);
+  --color-slate: oklch(0.2874 0.0072 262);
+  --color-ash: oklch(0.4183 0.0079 258);
+  --color-stone: oklch(0.5595 0.0083 254);
+  --color-mist: oklch(0.7226 0.0074 250);
+  --color-sand: oklch(0.8619 0.0119 79.2);
+  --color-bone: oklch(0.9481 0.0092 84.6);
+  --color-paper: oklch(0.9762 0.0058 88);
+
+  --color-ember: oklch(0.6618 0.1523 47.8);
+  --color-ember-deep: oklch(0.5487 0.1428 43.2);
+  --color-atlantic: oklch(0.5924 0.0812 219.4);
+  --color-atlantic-deep: oklch(0.4318 0.0704 224);
+
+  /* Semantic aliases. Components reference these, never the ramp directly,
+     so a palette revision is a change in this block alone. */
+  --color-surface: var(--color-void);
+  --color-surface-raised: var(--color-abyss);
+  --color-surface-inset: var(--color-basalt);
+  --color-ink: var(--color-paper);
+  --color-ink-muted: var(--color-mist);
+  --color-ink-subtle: var(--color-stone);
+  --color-hairline: oklch(1 0 0 / 6.5%);
+  --color-hairline-strong: oklch(1 0 0 / 13%);
+  --color-accent: var(--color-ember);
+  --color-positive: oklch(0.7124 0.1338 158);
+  --color-negative: oklch(0.6382 0.1794 25.4);
+
+  /* ── TYPE ─────────────────────────────────────────────────────────────────
+     Three families, three jobs. Fluid sizes use clamp() with a vw middle term
+     so headlines scale continuously between 390px and 1920px instead of
+     stepping at breakpoints — the stepping is what reads as "template".       */
+
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-editorial: var(--font-instrument), Georgia, 'Times New Roman', serif;
+
+  --text-hero: clamp(3.25rem, 15.5vw, 13rem);
+  --text-hero--line-height: 0.86;
+  --text-hero--letter-spacing: -0.045em;
+
+  --text-display: clamp(2.5rem, 10.5vw, 8.5rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.04em;
+
+  --text-headline: clamp(2rem, 6.5vw, 4.25rem);
+  --text-headline--line-height: 0.95;
+  --text-headline--letter-spacing: -0.033em;
+
+  --text-title: clamp(1.5rem, 3.6vw, 2.25rem);
+  --text-title--line-height: 1.06;
+  --text-title--letter-spacing: -0.025em;
+
+  --text-subtitle: clamp(1.125rem, 2.1vw, 1.4375rem);
+  --text-subtitle--line-height: 1.32;
+  --text-subtitle--letter-spacing: -0.015em;
+
+  --text-body: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  --text-body--line-height: 1.62;
+  --text-body--letter-spacing: -0.006em;
+
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.55;
+
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.1;
+  --text-label--letter-spacing: 0.18em;
+
+  --text-micro: 0.625rem;
+  --text-micro--line-height: 1.1;
+  --text-micro--letter-spacing: 0.14em;
+
+  --tracking-brand: 0.34em;
+
+  /* ── SHAPE ────────────────────────────────────────────────────────────────
+     Radii stay at or below 4px. A "premium" surface is defined by its edge and
+     its space, not by rounding; rounded-2xl + shadow-lg is the single fastest
+     way to make a page read as a €100 template.                               */
+
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-pill: 999px;
+
+  /* ── MOTION ───────────────────────────────────────────────────────────────
+     Two easings do almost all the work. expo is the "arrival" curve for
+     entrances; quint is the "transit" curve for anything that leaves and
+     returns. Durations are deliberately short — slow is not premium.          */
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.42, 0.64, 1);
+
+  --duration-instant: 120ms;
+  --duration-fast: 220ms;
+  --duration-base: 380ms;
+  --duration-slow: 620ms;
+  --duration-scene: 900ms;
+
+  /* ── LAYOUT ───────────────────────────────────────────────────────────────  */
+
+  --spacing-gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --spacing-section: clamp(5rem, 14vh, 11rem);
+  --spacing-scene-gap: clamp(6rem, 22svh, 16rem);
+
+  --container-editorial: 82rem;
+  --container-reading: 38rem;
+
+  --breakpoint-xs: 26.25rem;
+
+  /* ── DEPTH ────────────────────────────────────────────────────────────────
+     A single z-index ladder. Anything not listed here does not get a z-index.  */
+
+  --z-base: 0;
+  --z-sticky: 20;
+  --z-header: 40;
+  --z-overlay: 60;
+  --z-toast: 80;
+  --z-loader: 100;
+}
