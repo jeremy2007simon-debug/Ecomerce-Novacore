@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ContourField } from '@/components/visual/contour-field';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { fontVariables } from '@/styles/fonts';
 import { routes } from '@/lib/utils/routes';
 
 /**
@@ -27,6 +29,25 @@ import { routes } from '@/lib/utils/routes';
  */
 export function NotFoundView() {
   const { t, locale } = useLocale();
+
+  /*
+    Restore `lang` and the font variables on <html>.
+
+    On a not-found render Next replaces the root element with its own error
+    shell — `<html id="__next_error__">`, with no attributes — so the layout's
+    `lang` and font-variable classes are dropped. The header, footer and body
+    styling all survive; these two do not. Without `lang` a screen reader reads
+    Spanish copy in an English voice, and without the variables every `--font-*`
+    falls back, so the 404 was the one page on the site in the wrong typeface.
+
+    Effect rather than markup because the element is outside React's tree here.
+  */
+  useEffect(() => {
+    const root = document.documentElement;
+    if (root.lang === locale) return;
+    root.lang = locale;
+    root.classList.add(...fontVariables.split(' ').filter(Boolean));
+  }, [locale]);
 
   return (
     <main id="main" className="relative isolate flex min-h-[86svh] items-center overflow-clip">

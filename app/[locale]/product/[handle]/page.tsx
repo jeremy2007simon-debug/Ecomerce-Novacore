@@ -37,7 +37,17 @@ import { isLocale, LOCALES } from '@/types/i18n';
  * is server-rendered and passes through the scroll primitives as children.
  */
 
-export const dynamicParams = false;
+/*
+  `true`, so an unknown handle reaches the `notFound()` call below.
+
+  With `false`, Next rejected the unmatched param before this file ever ran —
+  which meant the branded 404 never rendered for a bad product URL either; the
+  visitor got the framework's built-in error page. The sixteen real product
+  pages are still prerendered exactly as before (`generateStaticParams`); only
+  a handle that does not exist now renders on demand, purely so it can 404
+  properly.
+*/
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const handles = await commerce.getAllHandles();

@@ -29,6 +29,10 @@ const VIEWPORTS = [
 const ROUTES = [
   '/es', '/es/collection', '/es/product/atlantic-01', '/es/product/atlantic-bottle',
   '/es/story', '/es/checkout', '/es/demo/dashboard', '/es/search?q=atl',
+  // The six information pages created in this pass.
+  '/es/shipping', '/es/returns', '/es/size-guide', '/es/contact', '/es/terms', '/es/privacy',
+  // The 404 body, which is now a locale-aware client island.
+  '/es/no-such-page',
 ];
 
 const browser = await chromium.launch({
@@ -37,6 +41,7 @@ const browser = await chromium.launch({
 });
 
 const findings = [];
+let measured = 0;
 
 for (const vp of VIEWPORTS) {
   const page = await browser.newPage({ viewport: { width: vp.w, height: vp.h } });
@@ -55,6 +60,7 @@ for (const vp of VIEWPORTS) {
       });
       await page.waitForTimeout(300);
 
+      const vpHeight = vp.h;
       const res = await page.evaluate(() => {
         const docW = document.documentElement.clientWidth;
         const scrollW = document.documentElement.scrollWidth;
@@ -74,8 +80,30 @@ for (const vp of VIEWPORTS) {
             }
           }
         }
-        return { docW, scrollW, overflow: scrollW - docW, offenders: offenders.slice(0, 4) };
+        return {
+          docW,
+          scrollW,
+          overflow: scrollW - docW,
+          offenders: offenders.slice(0, 4),
+          // Liveness. Measuring a blank error document reports "no overflow"
+          // and means nothing — which is exactly how the first run of this
+          // harness produced a false pass, when the proxy was answering
+          // 127.0.0.1 with a 405 and every page loaded empty.
+          nodes: document.querySelectorAll('body *').length,
+          height: document.body.scrollHeight,
+          title: document.title.slice(0, 40),
+        };
       });
+
+      if (res.nodes < 40 || res.height < vpHeight) {
+        findings.push({
+          vp: `${vp.w}x${vp.h}`,
+          route,
+          error: `EMPTY PAGE — ${res.nodes} nodes, ${res.height}px tall, title "${res.title}"`,
+        });
+        continue;
+      }
+      measured += 1;
 
       if (res.overflow > 1) {
         findings.push({ vp: `${vp.w}x${vp.h}`, route, overflow: res.overflow, offenders: res.offenders });
@@ -90,7 +118,10 @@ for (const vp of VIEWPORTS) {
 await browser.close();
 
 if (findings.length === 0) {
-  console.log('NO HORIZONTAL OVERFLOW across', VIEWPORTS.length, 'viewports x', ROUTES.length, 'routes');
+  console.log(
+  `NO HORIZONTAL OVERFLOW — ${measured} of ${VIEWPORTS.length * ROUTES.length} page loads`,
+  `actually measured (${VIEWPORTS.length} viewports x ${ROUTES.length} routes)`,
+);
 } else {
   console.log(`HORIZONTAL OVERFLOW: ${findings.length} case(s)`);
   for (const f of findings) {

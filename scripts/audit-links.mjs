@@ -17,7 +17,9 @@ const PROXY_OPTS = proxyUrl
 const B = process.env.BASE ?? 'http://127.0.0.1:3100';
 
 const ROUTES = ['/es', '/es/collection', '/es/product/atlantic-01', '/es/story',
-                '/es/checkout', '/es/demo/dashboard', '/es/search?q=atl', '/en'];
+                '/es/checkout', '/es/demo/dashboard', '/es/search?q=atl', '/en',
+                '/es/shipping', '/es/returns', '/es/size-guide', '/es/contact', '/es/terms', '/es/privacy',
+                '/en/shipping', '/en/size-guide', '/en/privacy'];
 
 const browser = await chromium.launch({
   executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
