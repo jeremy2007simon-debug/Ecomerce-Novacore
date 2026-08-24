@@ -63,7 +63,7 @@ export function SiteFooter({
   ];
 
   return (
-    <footer className="editorial border-t border-hairline pt-[--spacing-section] pb-10">
+    <footer className="editorial border-t border-hairline pt-(--spacing-section) pb-10">
       <div className="grid gap-14 lg:grid-cols-[1.2fr_2fr]">
         {/* Newsletter — clearly labelled as a demo form. */}
         <div className="max-w-sm">

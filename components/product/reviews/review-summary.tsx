@@ -38,7 +38,16 @@ export function ReviewSummaryPanel({
   return (
     <div className="grid gap-12 lg:grid-cols-[auto_1fr_1fr] lg:gap-16">
       <div>
-        <p className="text-hero font-medium leading-none text-ink" data-numeric>
+        {/*
+          `text-headline`, not `text-hero`.
+
+          `--text-hero` tops out at 13rem — 208px — and it was set beside a
+          distribution block only 87px tall, so "4,9" was more than twice the
+          height of everything it summarises and claimed a quarter of the row's
+          width. `--text-headline` (68px at its ceiling) reads as the figure
+          that heads this block without dwarfing it.
+        */}
+        <p className="text-headline font-medium leading-none text-ink" data-numeric>
           {summary.average.toFixed(1).replace('.', locale === 'es' ? ',' : '.')}
         </p>
         <Stars value={summary.average} size={16} className="mt-4" />

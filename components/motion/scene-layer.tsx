@@ -51,6 +51,15 @@ export interface SceneLayerOutputs {
   y?: Keyframes;
   x?: Keyframes;
   scale?: Keyframes;
+  /**
+   * Horizontal-only scale.
+   *
+   * Needed for anything that fills along one axis — progress rails, meters,
+   * underlines. Uniform `scale` on a 1px-tall bar shrinks its height too, so a
+   * half-filled rail rendered as a sub-pixel line that all but disappeared.
+   */
+  scaleX?: Keyframes;
+  scaleY?: Keyframes;
   rotate?: Keyframes;
   /** clip-path inset from the top, as a percentage. Used for masked reveals. */
   clipTop?: Keyframes;
@@ -106,6 +115,8 @@ export function SceneLayer({
   const y = useOutput(progress, from, to.y, 0);
   const x = useOutput(progress, from, to.x, 0);
   const scale = useOutput(progress, from, to.scale, 1);
+  const scaleX = useOutput(progress, from, to.scaleX, 1);
+  const scaleY = useOutput(progress, from, to.scaleY, 1);
   const rotate = useOutput(progress, from, to.rotate, 0);
   const clipTop = useOutput(progress, from, to.clipTop, 0);
   const clipBottom = useOutput(progress, from, to.clipBottom, 0);
@@ -129,6 +140,8 @@ export function SceneLayer({
         ...(to.y ? { y } : {}),
         ...(to.x ? { x } : {}),
         ...(to.scale ? { scale } : {}),
+        ...(to.scaleX ? { scaleX } : {}),
+        ...(to.scaleY ? { scaleY } : {}),
         ...(to.rotate ? { rotate } : {}),
         ...(useClip ? { clipPath } : {}),
       }}

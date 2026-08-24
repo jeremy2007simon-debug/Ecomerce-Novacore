@@ -19,6 +19,11 @@ import type { Product } from '@/types/commerce';
  * `safe-bottom` pads for env(safe-area-inset-bottom); without it the bar sits
  * underneath the iPhone home indicator, which is exactly the kind of detail
  * that makes a demo feel unfinished on the device it is being demoed on.
+ *
+ * The bar is fixed, so it reserves no layout space and covers whatever is at
+ * the bottom of the viewport. `--spacing-buy-bar` is the token other sections
+ * pad by to clear it; the bar claims that token as its own min-height so the
+ * two can never drift apart.
  */
 export function StickyBuyBar({
   product,
@@ -61,7 +66,7 @@ export function StickyBuyBar({
           animate={{ y: 0 }}
           exit={{ y: '110%' }}
           transition={{ type: 'spring', stiffness: 420, damping: 40 }}
-          className="safe-bottom fixed inset-x-0 bottom-0 z-(--z-sticky) border-t border-hairline-strong bg-void/94 px-4 pt-3 backdrop-blur-md lg:hidden"
+          className="safe-bottom fixed inset-x-0 bottom-0 z-(--z-sticky) min-h-(--spacing-buy-bar) border-t border-hairline-strong bg-void/94 px-4 pt-3 backdrop-blur-md lg:hidden"
         >
           <div className="flex items-center gap-4">
             <div className="min-w-0 grow">

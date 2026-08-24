@@ -44,7 +44,7 @@ export default async function CheckoutPage({
   const t = await getClientDictionary(locale);
 
   return (
-    <main id="main" className="editorial pb-[--spacing-section] pt-28 lg:pt-36">
+    <main id="main" className="editorial pb-(--spacing-section) pt-28 lg:pt-36">
       {/*
         The heading is rendered by the flow rather than here, because the
         confirmation step replaces the entire screen — including its title.

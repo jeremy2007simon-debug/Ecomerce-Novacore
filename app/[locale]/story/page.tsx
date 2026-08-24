@@ -50,7 +50,7 @@ export default async function StoryPage({ params }: { params: Promise<{ locale: 
   return (
     <main id="main">
       {/* ── OPENING ──────────────────────────────────────────────────────── */}
-      <section className="relative isolate flex min-h-[86svh] items-end overflow-clip pb-[--spacing-section] pt-32">
+      <section className="relative isolate flex min-h-[86svh] items-end overflow-clip pb-(--spacing-section) pt-32">
         <ContourField
           seed="story"
           tone="atlantic"
@@ -121,8 +121,8 @@ export default async function StoryPage({ params }: { params: Promise<{ locale: 
       </ScrollScene>
 
       {/* ── REMAINING CHAPTERS ───────────────────────────────────────────── */}
-      <section className="editorial py-[--spacing-section]">
-        <div className="flex flex-col gap-[--spacing-section]">
+      <section className="editorial py-(--spacing-section)">
+        <div className="flex flex-col gap-(--spacing-section)">
           {chapters.slice(1).map((chapter, i) => (
             <article key={chapter.key} className="grid gap-10 lg:grid-cols-[0.4fr_0.6fr] lg:gap-20">
               <div>

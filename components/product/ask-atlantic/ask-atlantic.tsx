@@ -77,7 +77,7 @@ export function AskAtlantic({
   return (
     <section
       aria-labelledby="ask-atlantic-heading"
-      className="editorial border-t border-hairline py-[--spacing-section]"
+      className="editorial border-t border-hairline py-(--spacing-section)"
     >
       <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
         <div>

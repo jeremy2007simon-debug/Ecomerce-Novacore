@@ -29,9 +29,18 @@ export function RelatedProducts({
   if (recommendations.length === 0) return null;
 
   return (
+    /*
+      The intrinsic size is a MEASURED placeholder, re-measured after the
+      Tailwind fix restored this section's `--spacing-section` padding: the
+      section renders 1116–1203px across 375–1920px, where the old 900px
+      estimate was tuned against the broken (padding-less) layout and left the
+      scrollbar jumping ~250px as the section came into view. `auto` means the
+      browser replaces this with the real size after the first render, so it
+      only governs the very first scroll past.
+    */
     <section
       aria-labelledby="related-heading"
-      className="editorial border-t border-hairline py-[--spacing-section] [content-visibility:auto] [contain-intrinsic-size:auto_900px]"
+      className="editorial border-t border-hairline py-(--spacing-section) [content-visibility:auto] [contain-intrinsic-size:auto_1200px]"
     >
       <Reveal className="mb-14">
         <Eyebrow>{copy.relatedSubtitle}</Eyebrow>

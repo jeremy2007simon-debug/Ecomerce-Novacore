@@ -55,7 +55,7 @@ export function PaymentMethods({
             onClick={() => onSelect(method.id)}
             aria-pressed={selected === method.id}
             className={cn(
-              'flex h-14 flex-col items-center justify-center gap-1 rounded-xs border transition-colors duration-[--duration-fast]',
+              'flex h-14 flex-col items-center justify-center gap-1 rounded-xs border transition-colors duration-(--duration-fast)',
               selected === method.id
                 ? 'border-ink bg-white/[0.04] text-ink'
                 : 'border-hairline-strong text-ink-muted hover:border-mist hover:text-ink',

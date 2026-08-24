@@ -93,7 +93,9 @@ export function PurchasePanel({
       : null;
 
   return (
-    <div className={cn('flex flex-col', className)}>
+    // `@container`: the size grid below sizes itself against THIS panel, not
+    // the viewport. The panel is half a grid track on desktop.
+    <div className={cn('@container flex flex-col', className)}>
       {showVisual && selectedMedia ? (
         <div className="mb-8">
           <ProductVisual
@@ -127,7 +129,7 @@ export function PurchasePanel({
                 aria-label={value.label}
                 title={value.label}
                 className={cn(
-                  'relative size-9 rounded-pill transition-transform duration-[--duration-fast] ease-[--ease-out-back]',
+                  'relative size-9 rounded-pill transition-transform duration-(--duration-fast) ease-(--ease-out-back)',
                   'ring-1 ring-inset ring-white/15',
                   color === value.value &&
                     'ring-2 ring-ember ring-offset-2 ring-offset-surface',
@@ -160,7 +162,13 @@ export function PurchasePanel({
             </button>
           </legend>
 
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {/*
+            Six across only once the panel itself is wide enough. `sm:` was a
+            viewport query — true from 640px — so at a 1024px viewport the six
+            buttons were crammed into a 421px column at 3.4rem each with their
+            labels touching the borders.
+          */}
+          <div className="grid grid-cols-3 gap-2 @sm:grid-cols-6">
             {sizeOption.values.map((value) => (
               <button
                 key={value.value}
@@ -169,7 +177,7 @@ export function PurchasePanel({
                 onClick={() => setSize(value.value)}
                 aria-pressed={size === value.value}
                 className={cn(
-                  'label flex h-11 items-center justify-center border transition-colors duration-[--duration-fast]',
+                  'label flex h-11 items-center justify-center border transition-colors duration-(--duration-fast)',
                   size === value.value
                     ? 'border-ink bg-paper text-void'
                     : 'border-hairline-strong text-ink-muted hover:border-mist hover:text-ink',
