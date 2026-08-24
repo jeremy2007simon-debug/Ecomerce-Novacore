@@ -24,6 +24,18 @@ export interface ImageMedia {
 }
 
 /**
+ * What a procedural frame depicts.
+ *
+ *  product  — the garment silhouette on the studio set. Matches the framing of
+ *             the photography so the two can sit side by side in one gallery.
+ *  material — an abstract macro of the fabric structure. Used for the wide
+ *             editorial frames, where a letterboxed silhouette would look like
+ *             a mistake and where generated art genuinely outperforms a
+ *             mediocre photograph.
+ */
+export type ProceduralVariant = 'product' | 'material';
+
+/**
  * Generated art. Always deterministic from `seed` — see lib/utils/prng.ts.
  * This branch is the guarantee that the site can never show a broken image.
  */
@@ -33,6 +45,7 @@ export interface ProceduralMedia {
   form: ProductForm;
   palette: PaletteKey;
   aspect: MediaAspect;
+  variant: ProceduralVariant;
   alt: string;
 }
 

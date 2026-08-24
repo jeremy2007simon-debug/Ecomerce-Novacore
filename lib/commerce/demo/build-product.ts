@@ -1,3 +1,4 @@
+import { mediaFor } from '@/data/media-manifest';
 import { DEMO_PRODUCTS, type DemoColorway, type DemoProduct } from '@/data/products';
 import { money } from '@/lib/utils/money';
 import type {
@@ -20,18 +21,50 @@ import type { ProductMedia } from '@/types/visual';
 
 const SIZELESS_FORMS = new Set(['bag', 'cap', 'bottle']);
 
-/** Deterministic media set for a product/colorway pair. */
+/**
+ * Media for a product/colorway pair.
+ *
+ * THE PHOTOGRAPHY SEAM IN PRACTICE.
+ *
+ * Each product has been photographed in its first colorway (basalt across the
+ * catalogue). Where a photograph exists for the requested colorway we return
+ * `kind: 'image'`; otherwise we return deterministic generated art tinted to
+ * that colorway.
+ *
+ * Both branches render into the same ProductVisual shell with identical
+ * geometry, so switching between them causes no layout shift and no visual
+ * discontinuity. As more colorways are shot, each one is a line in the manifest
+ * — no component changes.
+ */
 function buildMedia(product: DemoProduct, colorway: DemoColorway, locale: Locale): ProductMedia {
+  const alt =
+    locale === 'es'
+      ? `${product.title} en color ${colorway.label.es}`
+      : `${product.title} in ${colorway.label.en}`;
+
+  const photographedColorway = product.colorways[0]?.key;
+  const photo = colorway.key === photographedColorway ? mediaFor(product.handle) : undefined;
+
+  if (photo) {
+    return {
+      kind: 'image',
+      url: photo.file,
+      altText: alt,
+      width: photo.width,
+      height: photo.height,
+      aspect: '4/5',
+      blurDataURL: photo.blurDataURL,
+    };
+  }
+
   return {
     kind: 'procedural',
     seed: `${product.handle}:${colorway.key}`,
     form: product.form,
     palette: colorway.palette,
     aspect: '4/5',
-    alt:
-      locale === 'es'
-        ? `${product.title} en color ${colorway.label.es}`
-        : `${product.title} in ${colorway.label.en}`,
+    variant: 'product',
+    alt,
   };
 }
 
@@ -39,24 +72,28 @@ function buildMedia(product: DemoProduct, colorway: DemoColorway, locale: Locale
 function buildGallery(product: DemoProduct, locale: Locale): ProductMedia[] {
   const primary = product.colorways.map((c) => buildMedia(product, c, locale));
 
+  // Two material studies close the gallery. Wide frames get the weave macro
+  // rather than a letterboxed silhouette — see ProceduralProductArt.
   const editorial: ProductMedia[] = [
     {
       kind: 'procedural',
-      seed: `${product.handle}:editorial-a`,
+      seed: `${product.handle}:material-a`,
       form: product.form,
       palette: product.colorways[0]?.palette ?? 'basalt',
       aspect: '3/2',
+      variant: 'material',
       alt:
         locale === 'es'
-          ? `${product.title} fotografiada en exterior`
-          : `${product.title} photographed outdoors`,
+          ? `Macro del tejido de ${product.title}`
+          : `Fabric macro of ${product.title}`,
     },
     {
       kind: 'procedural',
-      seed: `${product.handle}:editorial-b`,
+      seed: `${product.handle}:material-b`,
       form: product.form,
       palette: product.colorways[1]?.palette ?? 'sand',
       aspect: '4/5',
+      variant: 'material',
       alt:
         locale === 'es'
           ? `Detalle de material de ${product.title}`
