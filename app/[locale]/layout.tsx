@@ -5,6 +5,10 @@ import { notFound } from 'next/navigation';
 
 import { CartHydrator } from '@/components/commerce/cart-hydrator';
 import { MotionProvider } from '@/components/motion';
+import { OverlayRoot } from '@/components/layout/overlay-root';
+import { SiteFooter } from '@/components/layout/site-footer';
+import { SiteHeader } from '@/components/layout/site-header';
+import { commerce } from '@/lib/commerce';
 import { GrainOverlay } from '@/components/visual/grain-overlay';
 import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
 import { HREFLANG, LOCALES } from '@/lib/i18n/config';
@@ -95,9 +99,11 @@ export default async function RootLayout({
   if (!isLocale(locale)) notFound();
 
   const typedLocale: Locale = locale;
-  const [clientDictionary, t] = await Promise.all([
+  const [clientDictionary, t, catalogue, collections] = await Promise.all([
     getClientDictionary(typedLocale),
     getServerDictionary(typedLocale),
+    commerce.getProducts({ collection: 'all', first: 50 }, { locale: typedLocale }),
+    commerce.getCollections({ locale: typedLocale }),
   ]);
 
   return (
@@ -110,7 +116,24 @@ export default async function RootLayout({
         <LocaleProvider locale={typedLocale} dictionary={clientDictionary}>
           {/* LazyMotion shell. `children` is server-rendered content passing
               through a client boundary — it costs no client JS of its own. */}
-          <MotionProvider>{children}</MotionProvider>
+          <MotionProvider>
+            {/*
+              #app-root is what Overlay marks `inert` while a dialog is open, so
+              assistive tech cannot wander out of the modal into the page behind
+              it. The overlays themselves portal OUTSIDE this element.
+            */}
+            <div id="app-root">
+              <SiteHeader nav={t.nav} />
+              {children}
+              <SiteFooter locale={typedLocale} copy={t.footer} />
+            </div>
+
+            <OverlayRoot
+              products={catalogue.nodes}
+              collections={collections}
+              nav={{ shop: t.nav.shop, story: t.nav.story, close: t.nav.close, menu: t.nav.menu }}
+            />
+          </MotionProvider>
         </LocaleProvider>
 
         {/* The page's single grain layer — see lib/utils/noise-tile.ts. */}

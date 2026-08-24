@@ -85,9 +85,20 @@ const config = [
     },
   },
 
-  // SEAM 1 (inverse) — the demo repository is the ONE place allowed to read data/.
+  // SEAM 1 (inverse) — the DATA LAYER may read data/. UI may not.
+  //
+  // The rule protects a boundary, not a directory: everything listed here is a
+  // module whose job is to turn demo fixtures into domain objects, which is
+  // exactly what a Shopify adapter would do. Adding a path here is a deliberate
+  // statement that the module is part of the data layer — never a way to quiet
+  // the rule for a component.
   {
-    files: ['lib/commerce/demo/**/*.ts', 'lib/commerce/**/*.ts', 'data/**/*.ts'],
+    files: [
+      'lib/commerce/**/*.ts',
+      'lib/assistant/**/*.ts',
+      'lib/dashboard/**/*.ts',
+      'data/**/*.ts',
+    ],
     rules: { 'no-restricted-imports': 'off' },
   },
 
