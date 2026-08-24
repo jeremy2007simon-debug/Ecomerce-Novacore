@@ -143,7 +143,6 @@ export const en = {
       sortRatingAsc: 'Lowest rated',
       showAll: 'All ratings',
       empty: 'No reviews match that filter.',
-      loadMore: 'Load more reviews',
       size: 'Size',
     },
     story: {
@@ -310,13 +309,6 @@ export const en = {
         cookies: 'Cookies',
       },
     },
-    notFound: {
-      code: '404',
-      title: 'This page is off the map',
-      body: 'The link may be old, or the page may have been retired.',
-      cta: 'Back to the collection',
-      home: 'Return home',
-    },
     error: {
       title: 'Something broke',
       body: 'An unexpected error stopped this page from rendering. The rest of the store is unaffected.',
@@ -361,6 +353,13 @@ export const en = {
   },
 
   client: {
+    notFound: {
+      code: '404',
+      title: 'This page is off the map',
+      body: 'The link may be old, or the page may have been retired.',
+      cta: 'Back to the collection',
+      home: 'Return home',
+    },
     cart: {
       title: 'Your bag',
       empty: 'Your bag is empty',

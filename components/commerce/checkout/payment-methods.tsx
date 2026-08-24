@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { DemoBadge } from '@/components/ui/demo-badge';
 import { Field } from './field';
 import { useLocale } from '@/lib/i18n/locale-provider';
@@ -12,8 +13,15 @@ import type { PaymentMethod } from './checkout-machine';
  *
  * No provider is contacted. Selecting Apple Pay or Google Pay does NOT open a
  * wallet sheet — it shows a note saying so. The card fields exist so the flow
- * looks complete, and their values are never read, validated or transmitted;
- * they are deliberately not even wired to state.
+ * looks complete.
+ *
+ * Those fields ARE typeable, and that is the fix. They used to be controlled
+ * with a literal `value=""` and an empty `onChange`, above a comment claiming
+ * they were uncontrolled — so React rewrote every keystroke back to the empty
+ * string and the checkout looked broken rather than simulated. They now hold
+ * their text in local component state: it never leaves this component, is
+ * never read by the checkout machine, never validated, never persisted and
+ * never transmitted, and it is discarded the moment the step unmounts.
  *
  * The DEMO badge sits on the section itself rather than only in a source
  * comment, because the person being shown this needs to know it too.
@@ -33,6 +41,15 @@ export function PaymentMethods({
   onSelect: (method: PaymentMethod) => void;
 }) {
   const { t } = useLocale();
+
+  /*
+    Local, and deliberately local. This state has no setter outside this
+    component and is passed to nothing — the only thing it does is let the
+    characters appear on screen.
+  */
+  const [card, setCard] = useState({ number: '', expiry: '', cvc: '' });
+  const setField = (key: keyof typeof card) => (value: string) =>
+    setCard((previous) => ({ ...previous, [key]: value }));
 
   const methods: { id: PaymentMethod; label: string }[] = [
     { id: 'card', label: t.checkout.card },
@@ -73,22 +90,29 @@ export function PaymentMethods({
 
       {selected === 'card' ? (
         <div className="mt-8 flex flex-col gap-7">
-          {/*
-            Uncontrolled on purpose. These inputs have no onChange and no state
-            binding, so the values physically cannot leave the DOM node they are
-            typed into.
-          */}
           <Field
             label={t.checkout.cardNumber}
-            value=""
-            onChange={() => {}}
+            value={card.number}
+            onChange={setField('number')}
             placeholder="0000 0000 0000 0000"
             inputMode="numeric"
             autoComplete="off"
           />
           <div className="grid grid-cols-2 gap-6">
-            <Field label={t.checkout.expiry} value="" onChange={() => {}} placeholder="MM / AA" autoComplete="off" />
-            <Field label={t.checkout.cvc} value="" onChange={() => {}} placeholder="123" autoComplete="off" />
+            <Field
+              label={t.checkout.expiry}
+              value={card.expiry}
+              onChange={setField('expiry')}
+              placeholder="MM / AA"
+              autoComplete="off"
+            />
+            <Field
+              label={t.checkout.cvc}
+              value={card.cvc}
+              onChange={setField('cvc')}
+              placeholder="123"
+              autoComplete="off"
+            />
           </div>
           <p className="micro-label text-ink-subtle">{t.checkout.demoCardNote}</p>
         </div>

@@ -124,12 +124,66 @@ export function SalesChart({
         ) : null}
       </div>
 
+      {/*
+        Readable with a keyboard, not only with a mouse.
+
+        The readout above was reachable exclusively through `onPointerMove`, so
+        every figure in this chart — the entire point of the panel — was
+        unavailable to anyone navigating by keyboard, and `touch-none` meant a
+        touch device could not scrub it either. It is now a focusable slider:
+        arrows step point by point, Home and End jump to the ends, Escape lets
+        go. `role="slider"` with the value attributes means a screen reader
+        announces the figure at each step rather than reading a bare image.
+
+        The drawing itself is untouched — same paths, same animation, same
+        gradient. This is only how the existing readout is reached.
+      */}
       <svg
         viewBox={`0 0 ${W} ${H}`}
         preserveAspectRatio="none"
-        className="h-56 w-full touch-none sm:h-72"
-        role="img"
+        className="h-56 w-full touch-none rounded-xs outline-none focus-visible:ring-1 focus-visible:ring-ember sm:h-72"
+        role="slider"
+        tabIndex={0}
         aria-label={`Revenue, ${rangeKey}`}
+        aria-valuemin={0}
+        aria-valuemax={points.length - 1}
+        aria-valuenow={hover ?? 0}
+        aria-valuetext={active ? `${labelFor(active)}: ${active.revenue}` : idleLabel}
+        onFocus={() => setHover((current) => current ?? points.length - 1)}
+        onBlur={() => setHover(null)}
+        onKeyDown={(event) => {
+          const last = points.length - 1;
+          const step = (delta: number) =>
+            setHover((current) =>
+              Math.max(0, Math.min(last, (current ?? last) + delta)),
+            );
+
+          switch (event.key) {
+            case 'ArrowLeft':
+            case 'ArrowDown':
+              event.preventDefault();
+              step(-1);
+              break;
+            case 'ArrowRight':
+            case 'ArrowUp':
+              event.preventDefault();
+              step(1);
+              break;
+            case 'Home':
+              event.preventDefault();
+              setHover(0);
+              break;
+            case 'End':
+              event.preventDefault();
+              setHover(last);
+              break;
+            case 'Escape':
+              setHover(null);
+              break;
+            default:
+              break;
+          }
+        }}
         onPointerLeave={() => setHover(null)}
         onPointerMove={(event) => {
           const rect = event.currentTarget.getBoundingClientRect();

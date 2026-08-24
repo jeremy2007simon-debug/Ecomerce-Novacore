@@ -141,7 +141,6 @@ export const es: Dictionary = {
       sortRatingAsc: 'Peor valoradas',
       showAll: 'Todas las valoraciones',
       empty: 'Ninguna opinión coincide con ese filtro.',
-      loadMore: 'Ver más opiniones',
       size: 'Talla',
     },
     story: {
@@ -308,13 +307,6 @@ export const es: Dictionary = {
         cookies: 'Cookies',
       },
     },
-    notFound: {
-      code: '404',
-      title: 'Esta página está fuera del mapa',
-      body: 'Puede que el enlace sea antiguo o que la página se haya retirado.',
-      cta: 'Volver a la colección',
-      home: 'Ir al inicio',
-    },
     error: {
       title: 'Algo se ha roto',
       body: 'Un error inesperado ha impedido mostrar esta página. El resto de la tienda no está afectado.',
@@ -359,6 +351,13 @@ export const es: Dictionary = {
   },
 
   client: {
+    notFound: {
+      code: '404',
+      title: 'Esta página está fuera del mapa',
+      body: 'Puede que el enlace sea antiguo o que la página se haya retirado.',
+      cta: 'Volver a la colección',
+      home: 'Ir al inicio',
+    },
     cart: {
       title: 'Tu bolsa',
       empty: 'Tu bolsa está vacía',

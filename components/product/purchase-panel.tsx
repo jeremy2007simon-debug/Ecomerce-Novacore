@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AddToBag } from '@/components/commerce/add-to-bag';
 import { ProductVisual } from '@/components/visual/product-visual';
 import { IconTruck } from '@/components/visual/icons';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { usePDPStore } from '@/lib/store/pdp-store';
 import { cn } from '@/lib/utils/cn';
 import { formatMoney } from '@/lib/utils/money';
 import { routes } from '@/lib/utils/routes';
@@ -77,22 +78,44 @@ export function PurchasePanel({
     variant.quantityAvailable > 0 &&
     variant.quantityAvailable <= 6;
 
-  const cartInput =
-    variant && variant.availableForSale && !needsSize
-      ? {
-          productId: product.id,
-          variantId: variant.id,
-          handle: product.handle,
-          title: product.title,
-          variantTitle: variant.title,
-          colorLabel: selectedColor?.label ?? '',
-          colorHex: selectedColor?.swatchHex ?? '#000000',
-          sizeLabel: size,
-          unitPrice: variant.price,
-          media: variant.media ?? product.media[0]!,
-          maxQuantity: Math.max(1, variant.quantityAvailable ?? 10),
-        }
-      : null;
+  /*
+    Memoised because it is published to the PDP store below. A fresh object
+    every render would push a new value into the store on every render, and
+    every subscriber — the sticky bar — would re-render with it.
+  */
+  const cartInput = useMemo(
+    () =>
+      variant && variant.availableForSale && !needsSize
+        ? {
+            productId: product.id,
+            variantId: variant.id,
+            handle: product.handle,
+            title: product.title,
+            variantTitle: variant.title,
+            colorLabel: selectedColor?.label ?? '',
+            colorHex: selectedColor?.swatchHex ?? '#000000',
+            sizeLabel: size,
+            unitPrice: variant.price,
+            media: variant.media ?? product.media[0]!,
+            maxQuantity: Math.max(1, variant.quantityAvailable ?? 10),
+          }
+        : null,
+    [product, variant, selectedColor, size, needsSize],
+  );
+
+  /*
+    Publish the selection for the mobile sticky bar.
+
+    This panel stays the only writer — the bar merely reads — so there is still
+    exactly one answer to "which size is selected". Cleared on unmount so a
+    selection cannot outlive the page it was made on.
+  */
+  const publish = usePDPStore((state) => state.publish);
+  const clearSelection = usePDPStore((state) => state.clear);
+  useEffect(() => {
+    publish({ input: cartInput, soldOut, needsSize });
+    return clearSelection;
+  }, [publish, clearSelection, cartInput, soldOut, needsSize]);
 
   return (
     // `@container`: the size grid below sizes itself against THIS panel, not
