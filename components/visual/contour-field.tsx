@@ -1,4 +1,4 @@
-import { createRng, fx, valueNoise1D } from '@/lib/utils/prng';
+import { createRng, fx } from '@/lib/utils/prng';
 import { cn } from '@/lib/utils/cn';
 
 /**
@@ -38,48 +38,70 @@ const TONE_STROKE: Record<NonNullable<ContourFieldProps['tone']>, string> = {
 export function ContourField({
   seed,
   rings = 26,
-  resolution = 120,
-  amplitude = 0.19,
+  resolution = 168,
+  amplitude = 0.075,
   origin = { x: 50, y: 62 },
   tone = 'neutral',
   className,
   'aria-hidden': ariaHidden = true,
 }: ContourFieldProps) {
   const rng = createRng(`${seed}:contour`);
-  const noise = valueNoise1D(`${seed}:noise`, 128);
 
-  // Rings are spaced on a curve, not linearly: tight near the summit, opening
-  // out toward the base. Even spacing is the giveaway of generated art.
+  /*
+    Displacement is a sum of low harmonics, not value noise.
+
+    Value noise sampled around a ring has two problems that both showed up on
+    screen: the sample rate has to be high enough to look organic, which makes
+    the line zigzag rather than curve, and the start and end of the ring land on
+    different noise values, so every contour has a visible seam. A short
+    harmonic series is periodic by construction — it closes seamlessly — and is
+    smooth by construction, which is what makes these read as surveyed elevation
+    rather than as a scribble.
+  */
+  const HARMONICS = 4;
+  const harmonics = Array.from({ length: HARMONICS }, (_, k) => ({
+    // Amplitude falls off with frequency: the shape is dominated by the first
+    // one or two harmonics, with the rest adding just enough irregularity.
+    amplitude: rng.float(0.5, 1) / Math.pow(k + 1.7, 1.5),
+    phase: rng.float(0, Math.PI * 2),
+    // Non-integer-free frequencies would break periodicity, so these stay whole.
+    frequency: k + 2,
+  }));
+
   const paths: { d: string; opacity: number; width: number }[] = [];
 
   for (let r = 0; r < rings; r += 1) {
     const t = (r + 1) / rings;
-    const radius = 6 + Math.pow(t, 1.42) * 78;
+    const radius = 7 + Math.pow(t, 1.38) * 76;
 
-    // Each ring samples a different band of the noise field so adjacent
-    // contours share a family resemblance without ever crossing.
-    const bandOffset = r * 0.135;
-    const bandAmp = amplitude * (0.35 + t * 0.85);
-    const wobble = rng.float(0.86, 1.14);
+    // Each ring rotates the harmonic phases a little, so contours drift against
+    // one another the way real terrain does instead of sitting concentric.
+    const drift = r * 0.16;
+    const bandAmp = amplitude * (0.45 + t * 0.75);
 
     const points: string[] = [];
     for (let i = 0; i <= resolution; i += 1) {
       const angle = (i / resolution) * Math.PI * 2;
-      const noiseAt = noise(bandOffset + (i / resolution) * 1.85);
-      // Elongate slightly on X: a perfect circle reads as a target, an ellipse
-      // reads as terrain seen in perspective.
-      const rr = radius * (1 + noiseAt * bandAmp * wobble);
-      const x = origin.x + Math.cos(angle) * rr * 1.24;
-      const y = origin.y + Math.sin(angle) * rr * 0.72;
+
+      let displacement = 0;
+      for (const h of harmonics) {
+        displacement += h.amplitude * Math.sin(h.frequency * angle + h.phase + drift);
+      }
+
+      const rr = radius * (1 + displacement * bandAmp);
+      // Elongated on X and flattened on Y: a circle reads as a target, an
+      // ellipse reads as terrain seen in perspective.
+      const x = origin.x + Math.cos(angle) * rr * 1.28;
+      const y = origin.y + Math.sin(angle) * rr * 0.66;
       points.push(`${fx(x)},${fx(y)}`);
     }
 
     paths.push({
       d: `M${points.join('L')}Z`,
-      // Fade outward so the field dissolves into the background instead of
-      // stopping at a hard edge.
-      opacity: 0.5 * (1 - Math.pow(t, 1.7)) + 0.045,
-      width: r % 5 === 0 ? 0.42 : 0.22,
+      // Fade outward so the field dissolves rather than stopping at an edge.
+      opacity: 0.42 * (1 - Math.pow(t, 1.8)) + 0.03,
+      // Every fifth ring is an index contour, as on a real map.
+      width: r % 5 === 0 ? 0.4 : 0.2,
     });
   }
 

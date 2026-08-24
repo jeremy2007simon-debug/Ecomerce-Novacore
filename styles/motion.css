@@ -136,7 +136,7 @@
   animation: atl-drift 24s var(--ease-in-out-quint) infinite alternate;
 }
 
-.atl-scroll-hint::after {
+.atl-scroll-hint > span {
   animation: atl-scroll-hint 2.6s var(--ease-in-out-quint) infinite;
 }
 
@@ -207,7 +207,7 @@
 
   .atl-drift,
   .atl-marquee-track,
-  .atl-scroll-hint::after {
+  .atl-scroll-hint > span {
     animation: none !important;
   }
 

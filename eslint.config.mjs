@@ -43,6 +43,12 @@ const config = [
               message:
                 'motion/react-client eagerly bundles the full feature set (~34kB) and defeats LazyMotion. Use `m` from motion/react-m inside <MotionProvider>.',
             },
+            {
+              name: 'motion/react',
+              importNames: ['motion'],
+              message:
+                'SEAM: the `motion` component factory pulls the whole feature bundle onto the critical path. Import `m` from motion/react-m instead; hooks (useScroll, useTransform, ...) from motion/react are fine.',
+            },
           ],
           patterns: [
             {

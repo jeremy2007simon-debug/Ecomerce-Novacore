@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 
 import { CartHydrator } from '@/components/commerce/cart-hydrator';
+import { MotionProvider } from '@/components/motion';
 import { GrainOverlay } from '@/components/visual/grain-overlay';
 import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
 import { HREFLANG, LOCALES } from '@/lib/i18n/config';
@@ -107,7 +108,9 @@ export default async function RootLayout({
         </a>
 
         <LocaleProvider locale={typedLocale} dictionary={clientDictionary}>
-          {children}
+          {/* LazyMotion shell. `children` is server-rendered content passing
+              through a client boundary — it costs no client JS of its own. */}
+          <MotionProvider>{children}</MotionProvider>
         </LocaleProvider>
 
         {/* The page's single grain layer — see lib/utils/noise-tile.ts. */}
