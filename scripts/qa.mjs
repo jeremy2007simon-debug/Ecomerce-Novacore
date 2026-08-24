@@ -4,8 +4,20 @@
  */
 import { chromium } from 'playwright';
 
+/*
+  Chromium does not read HTTPS_PROXY from the environment the way curl does.
+  Without this, hitting an external URL (the deployed site) fails with
+  ERR_CONNECTION_RESET while localhost works fine.
+*/
+const proxyUrl = process.env.HTTPS_PROXY ?? process.env.https_proxy;
+const PROXY_OPTS = proxyUrl ? { proxy: { server: proxyUrl } } : {};
+
 const B = 'http://127.0.0.1:3100';
-const launch = { executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] };
+const launch = {
+  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  args: ['--no-sandbox', '--ignore-certificate-errors'],
+  ...PROXY_OPTS,
+};
 let failures = 0;
 const check = (name, ok, detail = '') => {
   if (!ok) failures += 1;

@@ -4,9 +4,18 @@
  */
 import { chromium } from 'playwright';
 
+/*
+  Chromium does not read HTTPS_PROXY from the environment the way curl does.
+  Without this, hitting an external URL (the deployed site) fails with
+  ERR_CONNECTION_RESET while localhost works fine.
+*/
+const proxyUrl = process.env.HTTPS_PROXY ?? process.env.https_proxy;
+const PROXY_OPTS = proxyUrl ? { proxy: { server: proxyUrl } } : {};
+
 const browser = await chromium.launch({
   executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-  args: ['--no-sandbox'],
+  args: ['--no-sandbox', '--ignore-certificate-errors'],
+  ...PROXY_OPTS,
 });
 const page = await browser.newPage({
   viewport: { width: 390, height: 844 },
@@ -30,7 +39,7 @@ const step = async (name, fn) => {
   }
 };
 
-const B = 'http://127.0.0.1:3100';
+const B = process.env.BASE ?? 'http://127.0.0.1:3100';
 // Scope to <main>: the footer newsletter input also has an "email" label.
 const main = page.locator('main');
 
