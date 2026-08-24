@@ -1,0 +1,220 @@
+@import 'tailwindcss';
+@import './theme.css';
+@import './motion.css';
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  /* Tailwind v4 changed the default border colour to `currentColor`. Without
+     this, every bordered element inherits its text colour and the whole page
+     looks wrong at once. We opt into the hairline token instead. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-hairline);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    /* Anchors and scroll-into-view must clear the fixed header. */
+    scroll-padding-top: 5rem;
+    background-color: var(--color-void);
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    letter-spacing: var(--text-body--letter-spacing);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    /* `clip`, NOT `hidden`. `overflow: hidden` creates a scroll container, which
+       silently kills every `position: sticky` descendant — i.e. every scroll
+       scene — and it only shows up on device. `clip` contains the overflow
+       without creating one. See the kill-list in components/motion/sticky-stage.tsx */
+    overflow-x: clip;
+  }
+
+  /* Display type is set tight and optically dark. Archivo carries -0.045em at
+     hero sizes without collapsing; do not apply this tracking below ~2rem. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Prices, quantities and dashboard figures must not shift width as they
+     animate. Tabular figures everywhere numbers change. */
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* A designed focus ring. Removing the default one without replacing it is
+     the single most common way an otherwise good site fails accessibility. */
+  :focus-visible {
+    outline: 2px solid var(--color-ember);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: var(--color-ember);
+    color: var(--color-void);
+  }
+
+  /* Native form controls inherit nothing useful. */
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-ink-subtle);
+  }
+
+  /* iOS zooms the page when focusing an input under 16px. Never let that happen. */
+  @supports (-webkit-touch-callout: none) {
+    input,
+    textarea,
+    select {
+      font-size: max(16px, 1em);
+    }
+  }
+
+  img,
+  svg,
+  video,
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Firefox/Chrome scrollbars, tuned to the palette rather than left default. */
+  @supports (scrollbar-color: black white) {
+    html {
+      scrollbar-color: var(--color-slate) transparent;
+      scrollbar-width: thin;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   UTILITIES  (v4: `@utility`, not `@layer utilities` + `@apply`)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* The horizontal rhythm of the whole site. One utility so the editorial grid
+   stays aligned across every section without repeating clamp() values. */
+@utility gutter {
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility editorial {
+  width: 100%;
+  max-width: var(--container-editorial);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility reading {
+  width: 100%;
+  max-width: var(--container-reading);
+}
+
+/* Mono micro-label: the "ATLANTIC 01 · SHELL" and "28.2916° N" voice. */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  letter-spacing: var(--text-label--letter-spacing);
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+@utility micro-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+  letter-spacing: var(--text-micro--letter-spacing);
+  text-transform: uppercase;
+}
+
+/* Bottom-fixed UI on iPhone sits under the home indicator without this. */
+@utility safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@utility safe-top {
+  padding-top: max(0.5rem, env(safe-area-inset-top));
+}
+
+/* Clip a leaf WITHOUT creating a scroll container — safe above sticky elements. */
+@utility clip-safe {
+  overflow: clip;
+}
+
+/* Skip-link and screen-reader-only text. */
+@utility sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+
+  &:focus-visible {
+    position: fixed;
+    inset-block-start: 1rem;
+    inset-inline-start: 1rem;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0.75rem 1.25rem;
+    clip-path: none;
+    background: var(--color-paper);
+    color: var(--color-void);
+    z-index: var(--z-loader);
+  }
+}
+
+/* Hairline rules. Used instead of shadows for every kind of separation. */
+@utility rule-t {
+  border-top: 1px solid var(--color-hairline);
+}
+@utility rule-b {
+  border-bottom: 1px solid var(--color-hairline);
+}
