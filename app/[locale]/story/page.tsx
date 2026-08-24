@@ -124,7 +124,14 @@ export default async function StoryPage({ params }: { params: Promise<{ locale: 
       <section className="editorial py-(--spacing-section)">
         <div className="flex flex-col gap-(--spacing-section)">
           {chapters.slice(1).map((chapter, i) => (
-            <article key={chapter.key} className="grid gap-10 lg:grid-cols-[0.4fr_0.6fr] lg:gap-20">
+            // `id` per chapter: the footer links "Sustainability" straight to
+            // `#making`, the chapter that actually covers sourcing, factories
+            // and how far materials travel.
+            <article
+              key={chapter.key}
+              id={chapter.key}
+              className="grid scroll-mt-24 gap-10 lg:grid-cols-[0.4fr_0.6fr] lg:gap-20"
+            >
               <div>
                 <Reveal>
                   <Rule label={String(i + 2).padStart(2, '0')} />
@@ -140,7 +147,8 @@ export default async function StoryPage({ params }: { params: Promise<{ locale: 
       </section>
 
       {/* ── MATERIAL CODA ────────────────────────────────────────────────── */}
-      <section className="relative isolate overflow-clip border-t border-hairline">
+      {/* Linked from the footer as "Materials". */}
+      <section id="materials" className="relative isolate scroll-mt-24 overflow-clip border-t border-hairline">
         <Parallax speed={0.16} className="h-[60svh]">
           <MaterialMacro seed="story-macro" className="h-full w-full opacity-70" />
         </Parallax>

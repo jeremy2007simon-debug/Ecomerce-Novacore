@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AddToBag } from '@/components/commerce/add-to-bag';
 import { ProductVisual } from '@/components/visual/product-visual';
@@ -7,6 +8,7 @@ import { IconTruck } from '@/components/visual/icons';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { cn } from '@/lib/utils/cn';
 import { formatMoney } from '@/lib/utils/money';
+import { routes } from '@/lib/utils/routes';
 import type { Product, Variant } from '@/types/commerce';
 import type { VisualTint } from '@/types/visual';
 
@@ -157,9 +159,20 @@ export function PurchasePanel({
         <fieldset className="mb-8">
           <legend className="label mb-4 flex w-full items-baseline justify-between text-ink-subtle">
             <span>{sizeOption.label}</span>
-            <button type="button" className="text-ink underline decoration-hairline-strong underline-offset-4">
-              {t.product.size}
-            </button>
+            {/*
+              A real destination, and a distinct label.
+
+              This was a `<button>` with no `onClick` — nothing happened when
+              you pressed it — carrying `t.product.size`, the SAME string as
+              the legend beside it, so the picker read "TALLA  TALLA". It now
+              says "Guía de tallas" and goes to the size guide, which exists.
+            */}
+            <Link
+              href={routes.sizeGuide(locale)}
+              className="text-ink underline decoration-hairline-strong underline-offset-4 transition-colors duration-(--duration-fast) hover:decoration-ember"
+            >
+              {t.product.sizeGuide}
+            </Link>
           </legend>
 
           {/*

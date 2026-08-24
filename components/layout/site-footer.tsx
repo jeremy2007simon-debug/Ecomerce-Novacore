@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { AtlanticMonogram } from '@/components/visual/atlantic-mark';
+import { NewsletterForm } from './newsletter-form';
 import { Rule } from '@/components/ui/rule';
-import { DemoBadge } from '@/components/ui/demo-badge';
 import { routes } from '@/lib/utils/routes';
 import type { Locale } from '@/types/i18n';
 
@@ -12,6 +12,11 @@ import type { Locale } from '@/types/i18n';
  * small type. The brief is explicit about this and it is also simply correct:
  * the demo only works as a sales asset if Atlantic Supply reads as a real
  * company, and a real company does not carry its agency's logo on every page.
+ *
+ * Every link here goes somewhere real. Ten differently-labelled links used to
+ * resolve to `/story` — a page that says nothing about shipping, returns,
+ * sizing, contact or the legal terms. Six of them now have pages; materials
+ * and sustainability point at the sections of the story that cover them.
  */
 export function SiteFooter({
   locale,
@@ -47,17 +52,20 @@ export function SiteFooter({
       title: copy.about,
       links: [
         { label: copy.links.story, href: routes.story(locale) },
-        { label: copy.links.materials, href: routes.story(locale) },
-        { label: copy.links.sustainability, href: routes.story(locale) },
+        // Materials and sustainability are sections of the story, not pages of
+        // their own — the material coda and the "making" chapter. They now
+        // link to those sections rather than to the top of `/story`.
+        { label: copy.links.materials, href: routes.storyAnchor(locale, 'materials') },
+        { label: copy.links.sustainability, href: routes.storyAnchor(locale, 'making') },
       ],
     },
     {
       title: copy.help,
       links: [
-        { label: copy.links.shipping, href: routes.story(locale) },
-        { label: copy.links.returns, href: routes.story(locale) },
-        { label: copy.links.sizeGuide, href: routes.story(locale) },
-        { label: copy.links.contact, href: routes.story(locale) },
+        { label: copy.links.shipping, href: routes.shipping(locale) },
+        { label: copy.links.returns, href: routes.returns(locale) },
+        { label: copy.links.sizeGuide, href: routes.sizeGuide(locale) },
+        { label: copy.links.contact, href: routes.contact(locale) },
       ],
     },
   ];
@@ -70,30 +78,13 @@ export function SiteFooter({
           <h2 className="text-title font-medium text-ink">{copy.newsletterTitle}</h2>
           <p className="mt-3 text-small text-ink-muted">{copy.newsletterBody}</p>
 
-          <form
-            className="mt-7 flex items-center gap-3 border-b border-hairline-strong pb-3"
-            // DEMO: no action, no handler, no storage. Nothing is transmitted.
-            onSubmit={undefined}
-            action="#"
-          >
-            <label htmlFor="newsletter" className="sr-only">
-              {copy.newsletterPlaceholder}
-            </label>
-            <input
-              id="newsletter"
-              type="email"
-              placeholder={copy.newsletterPlaceholder}
-              className="w-full bg-transparent text-small text-ink outline-none placeholder:text-ink-subtle"
-            />
-            <button type="button" className="label shrink-0 text-ember">
-              {copy.newsletterCta}
-            </button>
-          </form>
-
-          <p className="micro-label mt-3 flex items-center gap-2 text-ink-subtle">
-            <DemoBadge />
-            {copy.newsletterDemo}
-          </p>
+          <NewsletterForm
+            copy={{
+              placeholder: copy.newsletterPlaceholder,
+              cta: copy.newsletterCta,
+              demo: copy.newsletterDemo,
+            }}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
@@ -132,14 +123,14 @@ export function SiteFooter({
 
         <div className="flex items-center gap-6">
           <Link
-            href={routes.story(locale)}
+            href={routes.terms(locale)}
             prefetch={false}
             className="micro-label text-ink-subtle hover:text-ink"
           >
             {copy.links.terms}
           </Link>
           <Link
-            href={routes.story(locale)}
+            href={routes.privacy(locale)}
             prefetch={false}
             className="micro-label text-ink-subtle hover:text-ink"
           >

@@ -26,6 +26,15 @@ export const routes = {
   search: (locale: Locale, query?: string) =>
     route(`/${locale}/search${query ? `?q=${encodeURIComponent(query)}` : ''}`),
   story: (locale: Locale) => route(`/${locale}/story`),
+  /** Story sections that the footer links to by name. */
+  storyAnchor: (locale: Locale, id: 'materials' | 'making') =>
+    route(`/${locale}/story#${id}`),
+  shipping: (locale: Locale) => route(`/${locale}/shipping`),
+  returns: (locale: Locale) => route(`/${locale}/returns`),
+  sizeGuide: (locale: Locale) => route(`/${locale}/size-guide`),
+  contact: (locale: Locale) => route(`/${locale}/contact`),
+  terms: (locale: Locale) => route(`/${locale}/terms`),
+  privacy: (locale: Locale) => route(`/${locale}/privacy`),
   dashboard: (locale: Locale) => route(`/${locale}/demo/dashboard`),
   anchor: (locale: Locale, id: string) => route(`/${locale}#${id}`),
 } as const;
