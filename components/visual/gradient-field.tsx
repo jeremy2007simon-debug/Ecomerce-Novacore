@@ -86,7 +86,7 @@ export function GradientField({
     const y = rng.float(i === 0 ? 4 : 10, i === 0 ? 44 : 96);
     const spread = rng.float(46, 92);
     const alpha = lamp.intensity;
-    return `radial-gradient(${fx(spread)}% ${fx(spread * rng.float(0.72, 1.06))}% at ${fx(x)}% ${fx(y)}%, color-mix(in oklch, ${lamp.color} ${fx(alpha * 100, 1)}%, transparent) 0%, transparent 68%)`;
+    return `radial-gradient(${fx(spread, 1)}% ${fx(spread * rng.float(0.72, 1.06), 1)}% at ${fx(x, 1)}% ${fx(y, 1)}%, color-mix(in oklch, ${lamp.color} ${fx(alpha * 100, 1)}%, transparent) 0%, transparent 68%)`;
   });
 
   return (

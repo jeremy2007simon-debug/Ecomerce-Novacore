@@ -102,11 +102,22 @@ const config = [
     rules: { 'no-restricted-imports': 'off' },
   },
 
+  // Error boundaries are the ONE exception to SEAM 3, and not by choice: Next
+  // requires error.tsx and global-error.tsx to be Client Components, because
+  // they receive a `reset` function and must be able to re-render on the
+  // client. They are exempted narrowly, by filename, rather than by loosening
+  // the rule for the whole app directory.
+  {
+    files: ['app/**/error.tsx', 'app/**/global-error.tsx'],
+    rules: { 'no-restricted-syntax': 'off' },
+  },
+
   // SEAM 3 — route files stay Server Components. A single 'use client' at the top
   // of a page.tsx converts all of its copy, data and SVG into client JS, and Next 16
   // removed the build-output column that used to make that visible.
   {
     files: ['app/**/*.tsx', 'app/**/*.ts'],
+    ignores: ['app/**/error.tsx', 'app/**/global-error.tsx'],
     rules: {
       'no-restricted-syntax': [
         'error',

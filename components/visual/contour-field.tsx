@@ -18,7 +18,17 @@ export interface ContourFieldProps {
   seed: string;
   /** Number of concentric contour rings. */
   rings?: number;
-  /** Vertices per ring. Higher = smoother, larger markup. */
+  /**
+   * Vertices per ring.
+   *
+   * Kept deliberately low. The displacement is a sum of low harmonics, so the
+   * curve is smooth BY CONSTRUCTION and does not need dense sampling to look
+   * smooth — unlike value noise, which is why the first version used 168.
+   *
+   * This matters more than it sounds: at 168 points across 26 rings the path
+   * data alone was ~55 kB of inlined markup per field, and it was the single
+   * largest contributor to a 121 kB HTML document on the product page.
+   */
   resolution?: number;
   /** How strongly noise displaces each vertex, as a fraction of the radius. */
   amplitude?: number;
@@ -38,7 +48,7 @@ const TONE_STROKE: Record<NonNullable<ContourFieldProps['tone']>, string> = {
 export function ContourField({
   seed,
   rings = 26,
-  resolution = 168,
+  resolution = 64,
   amplitude = 0.075,
   origin = { x: 50, y: 62 },
   tone = 'neutral',
@@ -93,7 +103,9 @@ export function ContourField({
       // ellipse reads as terrain seen in perspective.
       const x = origin.x + Math.cos(angle) * rr * 1.28;
       const y = origin.y + Math.sin(angle) * rr * 0.66;
-      points.push(`${fx(x)},${fx(y)}`);
+      // One decimal place: at these path lengths the extra precision is
+      // invisible and costs roughly a third of the markup.
+      points.push(`${fx(x, 1)},${fx(y, 1)}`);
     }
 
     paths.push({

@@ -1,12 +1,7 @@
 'use client';
 
-import {
-  useScroll,
-  useSpring,
-  useMotionValue,
-  useReducedMotion,
-  type UseScrollOptions,
-} from 'motion/react';
+import { useScroll, useSpring, useMotionValue, type UseScrollOptions } from 'motion/react';
+import { usePrefersReducedMotion } from '@/lib/hooks/use-prefers-reduced-motion';
 import { useMemo, useRef, type ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { SceneContext, type SceneContextValue } from './scene-context';
@@ -65,7 +60,7 @@ export function ScrollScene({
   children,
 }: ScrollSceneProps) {
   const ref = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion() ?? false;
+  const reduced = usePrefersReducedMotion();
 
   const { scrollYProgress } = useScroll({ target: ref, offset });
 

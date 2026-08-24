@@ -15,18 +15,18 @@ export function MaterialMacro({ className, seed = 'membrane' }: { className?: st
   const noise = valueNoise1D(`${seed}:fibre`, 128);
 
   // Face fabric: dense diagonal weave.
-  const face = Array.from({ length: 46 }, (_, i) => {
-    const t = i / 45;
+  const face = Array.from({ length: 30 }, (_, i) => {
+    const t = i / 29;
     const y = 6 + t * 26;
     const points: string[] = [];
-    for (let x = 0; x <= 200; x += 6) {
-      points.push(`${x},${fx(y + noise(t * 1.2 + x / 700) * 1.9 + Math.sin(x / 6 + i) * 0.5)}`);
+    for (let x = 0; x <= 200; x += 12) {
+      points.push(`${x},${fx(y + noise(t * 1.2 + x / 700) * 1.9 + Math.sin(x / 6 + i) * 0.5, 1)}`);
     }
     return { d: `M${points.join('L')}`, opacity: 0.16 + (1 - t) * 0.3 };
   });
 
   // Membrane: irregular micropores, not a grid.
-  const pores = Array.from({ length: 190 }, () => ({
+  const pores = Array.from({ length: 90 }, () => ({
     cx: rng.float(0, 200),
     cy: rng.float(40, 72),
     r: rng.float(0.35, 1.5),
@@ -34,10 +34,10 @@ export function MaterialMacro({ className, seed = 'membrane' }: { className?: st
   }));
 
   // Backer: knitted loops.
-  const loops = Array.from({ length: 26 }, (_, i) => {
+  const loops = Array.from({ length: 14 }, (_, i) => {
     const y = 82 + (i % 2) * 5;
-    return Array.from({ length: 26 }, (_, j) => ({
-      cx: j * 8 + (i % 2 ? 4 : 0),
+    return Array.from({ length: 14 }, (_, j) => ({
+      cx: j * 15 + (i % 2 ? 7 : 0),
       cy: y + Math.floor(i / 2) * 9,
     }));
   }).flat();
@@ -80,7 +80,7 @@ export function MaterialMacro({ className, seed = 'membrane' }: { className?: st
       {/* Layer 2 — microporous membrane */}
       <g fill="oklch(0.8619 0.0119 79.2)">
         {pores.map((pore, i) => (
-          <circle key={i} cx={fx(pore.cx)} cy={fx(pore.cy)} r={fx(pore.r)} fillOpacity={fx(pore.o)} />
+          <circle key={i} cx={fx(pore.cx, 1)} cy={fx(pore.cy, 1)} r={fx(pore.r, 1)} fillOpacity={fx(pore.o, 2)} />
         ))}
       </g>
 

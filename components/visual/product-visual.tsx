@@ -25,15 +25,33 @@ import { ProceduralProductArt } from './procedural-product-art';
  */
 
 /**
- * `sizes` per slot. Getting these wrong is the most common cause of a good
- * Lighthouse score collapsing: without them the browser downloads the largest
- * candidate for every thumbnail on the page.
+ * `sizes` per slot, and these MUST match the real rendered width.
+ *
+ * Getting them wrong is the most common cause of a good Lighthouse score
+ * collapsing, and it fails in two directions:
+ *
+ *  • too large — the browser downloads an oversized candidate for every
+ *    thumbnail on the page;
+ *  • WRONG — for a `priority` image, Next emits a preload carrying these
+ *    `sizes`. If the element then resolves to a different candidate at layout
+ *    time, the browser downloads the image TWICE and the preload is wasted.
+ *
+ * That second case was real here: `hero` was declared as `100vw`, so the
+ * preload fetched w=828 while the element — which is viewport minus gutters on
+ * mobile, and half the grid on desktop — fetched w=750. Two downloads of the
+ * LCP image, on the one request that most needed to be fast.
+ *
+ * The values below are measured against the actual layouts:
+ *   hero    PDP opening — full width minus gutters, half the grid ≥1024px
+ *   gallery scroll-snap figure at min(84vw, 34rem)
+ *   feature scene stage at min(62vw, 26rem) on mobile, one grid column above
+ *   card    2-up on mobile, 4-up from lg
  */
 const SLOT_SIZES: Record<VisualSlot, string> = {
-  hero: '100vw',
-  gallery: '(max-width: 768px) 88vw, 46vw',
-  feature: '(max-width: 768px) 92vw, 52vw',
-  card: '(max-width: 640px) 88vw, (max-width: 1024px) 44vw, 30vw',
+  hero: '(max-width: 1023px) 88vw, 44vw',
+  gallery: '(max-width: 768px) 84vw, 34rem',
+  feature: '(max-width: 1023px) 62vw, 40vw',
+  card: '(max-width: 640px) 44vw, (max-width: 1023px) 44vw, 23vw',
   thumb: '96px',
   bag: '88px',
 };

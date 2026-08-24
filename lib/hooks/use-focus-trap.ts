@@ -61,7 +61,19 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
     return () => {
       cancelAnimationFrame(frame);
       document.removeEventListener('keydown', onKeyDown);
-      previouslyFocused?.focus({ preventScroll: true });
+
+      // Restore on the NEXT frame, not synchronously.
+      //
+      // The panel is still in the DOM at cleanup time (it is animating out via
+      // AnimatePresence). Focusing the trigger now works, but when the exiting
+      // panel is finally removed the browser resets focus to <body> — so the
+      // restore silently undoes itself and a keyboard user is dumped back at
+      // the top of the document. Deferring puts the restore after the removal.
+      requestAnimationFrame(() => {
+        if (previouslyFocused?.isConnected) {
+          previouslyFocused.focus({ preventScroll: true });
+        }
+      });
     };
   }, [ref, active]);
 }

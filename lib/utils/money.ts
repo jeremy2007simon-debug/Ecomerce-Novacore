@@ -28,6 +28,22 @@ export function formatMoney(value: Money, locale: Locale): string {
   }).format(major);
 }
 
+/**
+ * Whole-currency formatting for dashboard figures.
+ *
+ * A KPI reading "19.716,61 €" looks like an invoice line; a KPI reading
+ * "19.717 €" looks like a metric. Cents are noise at this magnitude and they
+ * make the row harder to scan.
+ */
+export function formatMoneyRounded(value: Money, locale: Locale): string {
+  return new Intl.NumberFormat(LOCALE_TAG[locale], {
+    style: 'currency',
+    currency: value.currencyCode,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(value.amount / 100));
+}
+
 /** Compact form for dashboard figures: €1,5 k / €1.5k. */
 export function formatMoneyCompact(value: Money, locale: Locale): string {
   return new Intl.NumberFormat(LOCALE_TAG[locale], {

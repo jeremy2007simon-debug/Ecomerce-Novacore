@@ -1,6 +1,7 @@
 'use client';
 
-import { useMotionValue, useSpring, useReducedMotion } from 'motion/react';
+import { useMotionValue, useSpring } from 'motion/react';
+import { usePrefersReducedMotion } from '@/lib/hooks/use-prefers-reduced-motion';
 // Motion 13's react-m entry exports the elements directly (div, span, ...),
 // not an `m` namespace object, so this is a namespace import.
 import * as m from 'motion/react-m';
@@ -27,7 +28,7 @@ export function Magnetic({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const finePointer = useFinePointer();
-  const reduced = useReducedMotion() ?? false;
+  const reduced = usePrefersReducedMotion();
 
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);

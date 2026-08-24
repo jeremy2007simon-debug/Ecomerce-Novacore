@@ -349,6 +349,11 @@ export const es: Dictionary = {
         'No tengo una respuesta preparada para eso. En producción esto se conecta a un modelo real con el catálogo completo en contexto. Prueba a preguntar por tallas, materiales o qué llevar para una temperatura concreta.',
       openLabel: 'Hacer una pregunta sobre este producto',
     },
+    error: {
+      title: 'Algo se ha roto',
+      body: 'Un error inesperado ha impedido mostrar esta sección. El resto de la tienda no está afectado.',
+      retry: 'Reintentar',
+    },
     common: {
       close: 'Cerrar',
       back: 'Atrás',

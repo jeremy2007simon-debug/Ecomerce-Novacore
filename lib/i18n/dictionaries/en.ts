@@ -351,6 +351,11 @@ export const en = {
         'I do not have a scripted answer for that one. In production this connects to a real model with the full catalogue in context. Try asking about sizing, materials, or what to wear for a temperature.',
       openLabel: 'Ask a question about this product',
     },
+    error: {
+      title: 'Something broke',
+      body: 'An unexpected error stopped this section from rendering. The rest of the store is unaffected.',
+      retry: 'Try again',
+    },
     common: {
       close: 'Close',
       back: 'Back',

@@ -105,6 +105,11 @@ export function SiteFooter({
                   <li key={link.label}>
                     <Link
                       href={link.href}
+                      // Footer links are low-intent. Next prefetches every link
+                      // in the viewport by default, and the footer is in the
+                      // viewport on every page — that was ~144 kB of RSC
+                      // payloads competing with the LCP image for bandwidth.
+                      prefetch={false}
                       className="text-small text-ink-muted transition-colors hover:text-ink"
                     >
                       {link.label}
@@ -126,10 +131,18 @@ export function SiteFooter({
         </div>
 
         <div className="flex items-center gap-6">
-          <Link href={routes.story(locale)} className="micro-label text-ink-subtle hover:text-ink">
+          <Link
+            href={routes.story(locale)}
+            prefetch={false}
+            className="micro-label text-ink-subtle hover:text-ink"
+          >
             {copy.links.terms}
           </Link>
-          <Link href={routes.story(locale)} className="micro-label text-ink-subtle hover:text-ink">
+          <Link
+            href={routes.story(locale)}
+            prefetch={false}
+            className="micro-label text-ink-subtle hover:text-ink"
+          >
             {copy.links.privacy}
           </Link>
           {/* The single NovaCore mention on the entire storefront. */}

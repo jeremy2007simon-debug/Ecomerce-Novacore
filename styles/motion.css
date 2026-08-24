@@ -130,6 +130,36 @@
   animation-fill-mode: both;
 }
 
+/* ── BRAND LOADER ─────────────────────────────────────────────────────────────
+   Pure CSS, deliberately.
+
+   The first version animated out with Motion's AnimatePresence — and Motion's
+   feature bundle is DYNAMICALLY IMPORTED, so under a throttled connection the
+   chunk arrived late and the opaque overlay lingered over the hero. Measured
+   cost: +0.6s LCP and six Lighthouse points on the product page.
+
+   This is the same rule the hero entrance follows: anything that has to run
+   before or independently of hydration must be CSS. The overlay now fades on a
+   class change with no JavaScript dependency beyond toggling that class.       */
+
+.atl-loader {
+  opacity: 1;
+  transition: opacity 260ms var(--ease-out-quart);
+}
+
+.atl-loader[data-leaving='true'] {
+  opacity: 0;
+}
+
+.atl-loader-mark {
+  animation: atl-fade-rise 240ms var(--ease-out-expo) both;
+}
+
+.atl-loader-rule {
+  transform-origin: left center;
+  animation: atl-rule-draw 400ms var(--ease-out-expo) both;
+}
+
 /* ── AMBIENT ──────────────────────────────────────────────────────────────────  */
 
 .atl-drift {
@@ -207,7 +237,9 @@
 
   .atl-drift,
   .atl-marquee-track,
-  .atl-scroll-hint > span {
+  .atl-scroll-hint > span,
+  .atl-loader-mark,
+  .atl-loader-rule {
     animation: none !important;
   }
 

@@ -28,13 +28,13 @@ export function OriginVisual({ className, seed = 'origin' }: { className?: strin
     const jitter = rng.float(0.85, 1.15);
 
     const points: string[] = [`M-4 ${fx(baseY + 6)}`];
-    for (let x = -4; x <= 204; x += 4) {
+    for (let x = -4; x <= 204; x += 9) {
       const nx = x / 200;
       // A cone profile: a raised cosine, sharpened by an exponent.
       const cone = Math.pow(Math.max(0, Math.cos((nx - 0.46) * Math.PI * 1.42)), 2.1);
       const detail = noise(t * 1.7 + nx * 2.6) * 3.4 * jitter;
       const y = baseY - cone * peakHeight + detail;
-      points.push(`L${x} ${fx(y)}`);
+      points.push(`L${x} ${fx(y, 1)}`);
     }
     points.push(`L204 ${fx(baseY + 6)}`, 'L204 130', 'L-4 130', 'Z');
 

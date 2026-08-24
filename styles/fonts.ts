@@ -16,11 +16,19 @@ import { Archivo, JetBrains_Mono, Instrument_Serif } from 'next/font/google';
  * hero is an LCP failure no amount of animation polish recovers from.
  */
 
+/**
+ * Only the weights the design actually uses.
+ *
+ * Every declared weight is a separate woff2 that next/font preloads. Shipping
+ * 300 and 700 "just in case" cost real bytes on the critical path for faces
+ * that never render — the design uses 400 for body, 500 for headings and 600
+ * for the wordmark, and nothing else.
+ */
 export const archivo = Archivo({
   subsets: ['latin'],
   variable: '--font-archivo',
   display: 'swap',
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600'],
   preload: true,
 });
 
@@ -28,7 +36,7 @@ export const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains',
   display: 'swap',
-  weight: ['300', '400', '500'],
+  weight: ['400'],
   preload: true,
 });
 

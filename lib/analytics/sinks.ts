@@ -22,34 +22,51 @@ export const consoleSink: AnalyticsSink = {
   },
 };
 
-const RING_CAPACITY = 200;
+const RING_CAPACITY = 120;
+const STORAGE_KEY = 'atl.events.v1';
 
 /**
- * A bounded in-memory ring buffer.
+ * A bounded ring buffer of the events this session produced.
  *
- * This is what powers the live EVENT STREAM panel on /demo/dashboard: a
- * business owner browses the store, opens the dashboard, and sees the events
- * their own visit produced. It costs nothing and it demonstrates the analytics
- * layer more convincingly than any static chart.
+ * This powers the live EVENT STREAM panel on /demo/dashboard: a business owner
+ * browses the store, opens the dashboard, and sees their own visit. It
+ * demonstrates the analytics layer far more convincingly than a static chart.
  *
- * Session-scoped and memory-only — nothing is persisted or transmitted.
+ * WHY IT IS PERSISTED TO sessionStorage
+ *
+ * The dashboard is deliberately not linked from the storefront — the intended
+ * path is someone typing /demo/dashboard into the address bar. That is a hard
+ * navigation, which tears down module state, so a purely in-memory buffer
+ * arrives empty exactly when the feature is being demonstrated. (Verified: the
+ * panel showed nothing after a real browse-then-navigate run.)
+ *
+ * sessionStorage keeps it honest — scoped to the tab, cleared when it closes,
+ * never transmitted anywhere — while making the feature work the way it is
+ * actually used.
+ *
+ * Hydration happens on first `subscribe`, which runs in an effect, so the
+ * server snapshot and the first client render both see an empty buffer and
+ * there is no mismatch.
  */
 class MemorySink implements AnalyticsSink {
   readonly id = 'memory';
   private buffer: TrackedEvent[] = [];
   private listeners = new Set<(events: TrackedEvent[]) => void>();
+  private hydrated = false;
 
   send(event: TrackedEvent) {
     this.buffer = [event, ...this.buffer].slice(0, RING_CAPACITY);
-    for (const listener of this.listeners) listener(this.buffer);
+    this.persist();
+    this.emit();
   }
 
-  /** Newest first. */
+  /** Newest first. Stable reference between changes. */
   snapshot(): TrackedEvent[] {
     return this.buffer;
   }
 
   subscribe(listener: (events: TrackedEvent[]) => void): () => void {
+    this.hydrate();
     this.listeners.add(listener);
     return () => {
       this.listeners.delete(listener);
@@ -58,7 +75,45 @@ class MemorySink implements AnalyticsSink {
 
   clear() {
     this.buffer = [];
+    this.persist();
+    this.emit();
+  }
+
+  private emit() {
     for (const listener of this.listeners) listener(this.buffer);
+  }
+
+  private hydrate() {
+    if (this.hydrated || typeof window === 'undefined') return;
+    this.hydrated = true;
+
+    try {
+      const raw = window.sessionStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+
+      const stored = JSON.parse(raw) as TrackedEvent[];
+      if (!Array.isArray(stored) || stored.length === 0) return;
+
+      // Merge rather than replace: events fired during this page's own load
+      // are already in the buffer and are newer than anything stored.
+      const seen = new Set(this.buffer.map((event) => `${event.sessionId}:${event.id}`));
+      const restored = stored.filter((event) => !seen.has(`${event.sessionId}:${event.id}`));
+
+      this.buffer = [...this.buffer, ...restored].slice(0, RING_CAPACITY);
+      this.emit();
+    } catch {
+      // Private mode, blocked storage, or malformed JSON. Analytics must never
+      // break the page, so a failed restore is simply an empty feed.
+    }
+  }
+
+  private persist() {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.buffer));
+    } catch {
+      // Quota or blocked storage — non-fatal.
+    }
   }
 }
 

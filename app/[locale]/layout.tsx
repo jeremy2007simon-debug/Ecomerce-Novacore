@@ -3,6 +3,8 @@ import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 
+import { AnalyticsContextSync } from '@/components/analytics/analytics-context-sync';
+import { BrandLoader } from '@/components/layout/brand-loader';
 import { CartHydrator } from '@/components/commerce/cart-hydrator';
 import { MotionProvider } from '@/components/motion';
 import { OverlayRoot } from '@/components/layout/overlay-root';
@@ -139,8 +141,15 @@ export default async function RootLayout({
         {/* The page's single grain layer — see lib/utils/noise-tile.ts. */}
         <GrainOverlay />
 
-        {/* Renders nothing; reads the persisted cart after first paint. */}
+        {/*
+          An overlay that animates OUT, never a gate. The hero above is already
+          painted underneath it from the first frame, so it cannot delay LCP.
+        */}
+        <BrandLoader />
+
+        {/* Both render nothing. */}
         <CartHydrator />
+        <AnalyticsContextSync locale={typedLocale} />
       </body>
     </html>
   );

@@ -42,14 +42,33 @@ export function OverlayRoot({
   const [warm, setWarm] = useState(false);
 
   useEffect(() => {
-    const idle =
-      typeof window.requestIdleCallback === 'function'
-        ? window.requestIdleCallback
-        : (cb: IdleRequestCallback) => window.setTimeout(() => cb({} as IdleDeadline), 1400);
+    /*
+      Warm AFTER the load event, not merely when the main thread goes idle.
 
-    const handle = idle(() => setWarm(true));
+      requestIdleCallback fires during the page's own loading window on a slow
+      connection — there is idle time while the browser waits on the network —
+      so the drawer, search and menu chunks were being fetched in competition
+      with the LCP image. Waiting for `load` guarantees the critical path has
+      finished before any of this is requested.
+    */
+    let handle = 0;
+    const schedule = () => {
+      const idle =
+        typeof window.requestIdleCallback === 'function'
+          ? window.requestIdleCallback
+          : (cb: IdleRequestCallback) => window.setTimeout(() => cb({} as IdleDeadline), 200);
+      handle = idle(() => setWarm(true)) as unknown as number;
+    };
+
+    if (document.readyState === 'complete') {
+      schedule();
+      return;
+    }
+
+    window.addEventListener('load', schedule, { once: true });
     return () => {
-      if (typeof window.cancelIdleCallback === 'function' && typeof handle === 'number') {
+      window.removeEventListener('load', schedule);
+      if (typeof window.cancelIdleCallback === 'function' && handle) {
         window.cancelIdleCallback(handle);
       }
     };
