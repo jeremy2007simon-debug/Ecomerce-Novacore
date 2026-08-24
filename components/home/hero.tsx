@@ -66,7 +66,7 @@ export function Hero({
           {/* Eyebrow */}
           <p
             className="label atl-enter-fade mb-6 flex items-center gap-3 text-ink-subtle"
-            style={{ ['--atl-delay' as string]: '0.28s' }}
+            style={{ ['--atl-delay' as string]: '0.24s' }}
           >
             <span className="text-ember">{copy.eyebrow}</span>
             <span aria-hidden="true" className="h-px w-8 bg-hairline-strong" />
@@ -82,7 +82,7 @@ export function Hero({
             <span className="block overflow-clip py-[0.04em]">
               <span
                 className="atl-enter-mask block"
-                style={{ ['--atl-delay' as string]: '0.16s' }}
+                style={{ ['--atl-delay' as string]: '0.04s' }}
               >
                 {copy.titleTop}
               </span>
@@ -90,7 +90,7 @@ export function Hero({
             <span className="block overflow-clip py-[0.04em]">
               <span
                 className="atl-enter-mask block"
-                style={{ ['--atl-delay' as string]: '0.3s' }}
+                style={{ ['--atl-delay' as string]: '0.13s' }}
               >
                 {copy.titleBottom}
               </span>
@@ -100,7 +100,7 @@ export function Hero({
           <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
             <p
               className="atl-enter-rise reading text-subtitle text-ink-muted"
-              style={{ ['--atl-delay' as string]: '0.52s' }}
+              style={{ ['--atl-delay' as string]: '0.42s' }}
             >
               {copy.subtitle}
             </p>
@@ -109,7 +109,7 @@ export function Hero({
             <Link
               href={routes.anchor(locale, 'origin')}
               className="atl-enter-rise group inline-flex shrink-0 items-center gap-4 self-start border-b border-hairline-strong pb-3 transition-colors duration-[--duration-fast] hover:border-ember focus-visible:border-ember sm:self-auto"
-              style={{ ['--atl-delay' as string]: '0.62s' }}
+              style={{ ['--atl-delay' as string]: '0.52s' }}
             >
               <span className="label text-ink">{copy.cta}</span>
               <IconArrowDown className="size-4 text-ember transition-transform duration-[--duration-base] ease-[--ease-out-expo] group-hover:translate-y-1" />
@@ -120,7 +120,7 @@ export function Hero({
           <div
             aria-hidden="true"
             className="atl-enter-fade mt-14 flex items-center gap-4"
-            style={{ ['--atl-delay' as string]: '0.9s' }}
+            style={{ ['--atl-delay' as string]: '0.78s' }}
           >
             <span className="micro-label text-ink-subtle">{copy.scrollHint}</span>
             <span className="atl-scroll-hint relative h-10 w-px overflow-clip bg-hairline">

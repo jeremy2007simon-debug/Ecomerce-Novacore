@@ -127,6 +127,8 @@
   --duration-base: 380ms;
   --duration-slow: 620ms;
   --duration-scene: 900ms;
+  /* Budget for a mask over an above-the-fold LCP candidate. See motion.css. */
+  --duration-reveal: 540ms;
 
   /* ── LAYOUT ───────────────────────────────────────────────────────────────  */
 

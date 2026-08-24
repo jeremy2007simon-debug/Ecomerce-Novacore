@@ -9,10 +9,19 @@
 
 /* ── ENTRANCE ─────────────────────────────────────────────────────────────────
    NOTE THE ABSENCE OF `opacity: 0`.
+
    An LCP candidate that starts transparent is treated as not-yet-painted, so a
-   fade-in headline pushes LCP out by the full duration of the fade. These
-   reveals use clip-path + translate only; the element is opaque from frame one
-   and counts as painted immediately. Do not "improve" these by adding a fade. */
+   fade-in headline pushes LCP out by the full duration of the fade.
+
+   IMPORTANT, AND MEASURED: a clip-path mask is NOT a free pass. A fully clipped
+   element has zero visible area, so it is not an LCP candidate either — the
+   home page's LCP was being attributed to the header wordmark while the hero
+   headline was still masked. Avoiding `opacity: 0` and then masking for 900ms
+   simply trades one trap for its twin.
+
+   So the mask is kept SHORT. `--duration-reveal` is the budget for anything
+   that hides an above-the-fold LCP candidate, and it is deliberately much
+   shorter than `--duration-scene`. Do not lengthen it, and do not add a fade. */
 
 @keyframes atl-mask-up {
   from {
@@ -100,7 +109,7 @@
    `--atl-delay` lets a parent stagger children without a JS orchestrator.      */
 
 .atl-enter-mask {
-  animation: atl-mask-up var(--duration-scene) var(--ease-out-expo) both;
+  animation: atl-mask-up var(--duration-reveal) var(--ease-out-expo) both;
   animation-delay: var(--atl-delay, 0ms);
   will-change: clip-path, transform;
 }
