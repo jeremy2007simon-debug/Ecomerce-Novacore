@@ -45,7 +45,7 @@ export function ProductCard({
 
         <div className="relative overflow-clip rounded-xs">
           {media ? (
-            <div className="transition-transform duration-[900ms] ease-[--ease-out-expo] group-hover:scale-[1.035]">
+            <div className="transition-transform duration-[900ms] ease-(--ease-out-expo) group-hover:scale-[1.035]">
               <ProductVisual media={media} slot="card" priority={priority} />
             </div>
           ) : null}

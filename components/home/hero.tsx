@@ -108,11 +108,11 @@ export function Hero({
             {/* CTA — discreet, as the brief asks. An outline rule, not a pill. */}
             <Link
               href={routes.anchor(locale, 'origin')}
-              className="atl-enter-rise group inline-flex shrink-0 items-center gap-4 self-start border-b border-hairline-strong pb-3 transition-colors duration-[--duration-fast] hover:border-ember focus-visible:border-ember sm:self-auto"
+              className="atl-enter-rise group inline-flex shrink-0 items-center gap-4 self-start border-b border-hairline-strong pb-3 transition-colors duration-(--duration-fast) hover:border-ember focus-visible:border-ember sm:self-auto"
               style={{ ['--atl-delay' as string]: '0.52s' }}
             >
               <span className="label text-ink">{copy.cta}</span>
-              <IconArrowDown className="size-4 text-ember transition-transform duration-[--duration-base] ease-[--ease-out-expo] group-hover:translate-y-1" />
+              <IconArrowDown className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-y-1" />
             </Link>
           </div>
 

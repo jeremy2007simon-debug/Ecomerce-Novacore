@@ -53,7 +53,7 @@ export default async function SearchPage({
   ]);
 
   return (
-    <main id="main" className="editorial pb-[--spacing-section] pt-28 lg:pt-36">
+    <main id="main" className="editorial pb-(--spacing-section) pt-28 lg:pt-36">
       <Eyebrow>{t.search.title}</Eyebrow>
 
       <h1 className="text-headline mt-6 font-medium text-ink">

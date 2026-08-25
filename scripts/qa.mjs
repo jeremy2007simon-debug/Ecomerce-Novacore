@@ -10,7 +10,14 @@ import { chromium } from 'playwright';
   ERR_CONNECTION_RESET while localhost works fine.
 */
 const proxyUrl = process.env.HTTPS_PROXY ?? process.env.https_proxy;
-const PROXY_OPTS = proxyUrl ? { proxy: { server: proxyUrl } } : {};
+// `bypass` is NOT optional. Playwright's proxy option ignores the environment's
+// no_proxy list, so without it Chromium routes 127.0.0.1 through the agent
+// proxy, which answers non-CONNECT requests with 405 — every local page then
+// loads as an empty error document and any audit run against it is silently
+// measuring nothing.
+const PROXY_OPTS = proxyUrl
+  ? { proxy: { server: proxyUrl, bypass: 'localhost,127.0.0.1,::1' } }
+  : {};
 
 const B = 'http://127.0.0.1:3100';
 const launch = {

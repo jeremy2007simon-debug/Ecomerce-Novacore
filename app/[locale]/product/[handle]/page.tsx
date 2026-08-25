@@ -37,7 +37,17 @@ import { isLocale, LOCALES } from '@/types/i18n';
  * is server-rendered and passes through the scroll primitives as children.
  */
 
-export const dynamicParams = false;
+/*
+  `true`, so an unknown handle reaches the `notFound()` call below.
+
+  With `false`, Next rejected the unmatched param before this file ever ran —
+  which meant the branded 404 never rendered for a bad product URL either; the
+  visitor got the framework's built-in error page. The sixteen real product
+  pages are still prerendered exactly as before (`generateStaticParams`); only
+  a handle that does not exist now renders on demand, purely so it can 404
+  properly.
+*/
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const handles = await commerce.getAllHandles();
@@ -127,12 +137,29 @@ export default async function ProductPage({
       />
 
       {/* ── OPENING: the product, large, with the essentials ─────────────── */}
-      <section className="editorial grid gap-12 pt-28 lg:grid-cols-2 lg:gap-20 lg:pt-36">
-        <div className="lg:sticky lg:top-24 lg:self-start">
-          <ProductVisual media={hero} slot="hero" priority />
+      <section className="editorial grid gap-12 pt-28 pb-(--spacing-section) lg:grid-cols-2 lg:gap-20 lg:pt-36">
+        {/*
+          `top-20` matches the 64px header plus a little air, and agrees with the
+          5rem `scroll-padding-top` in globals.css — previously this said
+          `top-24` and there were three different values for the same clearance.
+
+          The height guard matters: this column is 4/5 of a 544px track, i.e.
+          680px tall. Pinned 96px down that needs a 776px viewport, so on a
+          1440x768 laptop the bottom of the image could never be scrolled into
+          view. Capping at the space actually available keeps it whole.
+        */}
+        <div className="lg:sticky lg:top-20 lg:self-start">
+          <div className="lg:max-h-[calc(100svh-7rem)] lg:overflow-clip lg:rounded-xs">
+            <ProductVisual media={hero} slot="hero" priority />
+          </div>
         </div>
 
-        <div className="flex flex-col">
+        {/*
+          `@container` makes this column a container-query context so the
+          headline below can be sized against the COLUMN rather than the
+          viewport. See the h1 for why that is necessary.
+        */}
+        <div className="@container flex flex-col">
           <nav aria-label="Breadcrumb" className="mb-8">
             <Link href={routes.collection(locale)} className="micro-label text-ink-subtle hover:text-ink">
               {t.collection.title}
@@ -141,7 +168,24 @@ export default async function ProductPage({
 
           <Eyebrow>{product.metafields.material}</Eyebrow>
 
-          <RevealText as="h1" driver="css" split="none" className="text-display mt-6 font-medium text-ink">
+          {/*
+            Sized in `cqi` (percent of the CONTAINER's inline size), not `vw`.
+
+            `--text-display` is `clamp(2.5rem, 10.5vw, 8.5rem)`, which is right
+            for a full-bleed headline but wrong here: this h1 lives in half a
+            grid track, so the viewport-driven size overflowed the column by
+            62–68px at every desktop width (measured 1024/1150/1280/1440) and
+            `overflow-x: clip` on body swallowed it silently — the "cut off"
+            text. Container units track the column, so it fits by construction
+            at any width. The clamp bounds keep it identical on mobile, where
+            the column is already the full width.
+          */}
+          <RevealText
+            as="h1"
+            driver="css"
+            split="none"
+            className="mt-6 text-[clamp(2.5rem,17cqi,8.5rem)] font-medium leading-[0.9] tracking-[-0.04em] text-ink"
+          >
             {product.title}
           </RevealText>
 
@@ -177,7 +221,7 @@ export default async function ProductPage({
       <EditorialGallery media={galleryMedia} label={t.product.gallery} />
 
       {/* ── MATERIAL ─────────────────────────────────────────────────────── */}
-      <section className="relative isolate overflow-clip border-y border-hairline py-[--spacing-section]">
+      <section className="relative isolate overflow-clip border-y border-hairline py-(--spacing-section)">
         <MaterialMacro
           seed={`${product.handle}-macro`}
           className="absolute inset-0 -z-10 opacity-35"
@@ -197,7 +241,7 @@ export default async function ProductPage({
       </section>
 
       {/* ── DETAILS ──────────────────────────────────────────────────────── */}
-      <section className="editorial py-[--spacing-section]">
+      <section className="editorial py-(--spacing-section)">
         <div className="grid gap-14 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
           <div>
             <Eyebrow>{t.product.details}</Eyebrow>
@@ -208,10 +252,17 @@ export default async function ProductPage({
       </section>
 
       {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
-      <section
-        id="reviews"
-        className="editorial border-t border-hairline py-[--spacing-section] [content-visibility:auto] [contain-intrinsic-size:auto_1100px]"
-      >
+      {/*
+        No `content-visibility: auto` here, unlike the other heavy sections.
+
+        This section is a fragment-navigation TARGET — the rating link beside
+        the price points at `#reviews`. With its subtree skipped the browser
+        scrolls to the `contain-intrinsic-size` placeholder and only then lays
+        the real content out, so the jump landed a few hundred pixels off and
+        the page lurched underneath the reader. A target you can navigate to
+        has to be laid out.
+      */}
+      <section id="reviews" className="editorial border-t border-hairline py-(--spacing-section)">
         <Rule label={t.product.reviews} className="mb-14" />
         <ReviewSummaryPanel summary={reviews.summary} locale={locale} copy={t.reviews} />
         <div className="mt-20">

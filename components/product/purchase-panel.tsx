@@ -1,12 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { AddToBag } from '@/components/commerce/add-to-bag';
 import { ProductVisual } from '@/components/visual/product-visual';
 import { IconTruck } from '@/components/visual/icons';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { usePDPStore } from '@/lib/store/pdp-store';
 import { cn } from '@/lib/utils/cn';
 import { formatMoney } from '@/lib/utils/money';
+import { routes } from '@/lib/utils/routes';
 import type { Product, Variant } from '@/types/commerce';
 import type { VisualTint } from '@/types/visual';
 
@@ -75,25 +78,49 @@ export function PurchasePanel({
     variant.quantityAvailable > 0 &&
     variant.quantityAvailable <= 6;
 
-  const cartInput =
-    variant && variant.availableForSale && !needsSize
-      ? {
-          productId: product.id,
-          variantId: variant.id,
-          handle: product.handle,
-          title: product.title,
-          variantTitle: variant.title,
-          colorLabel: selectedColor?.label ?? '',
-          colorHex: selectedColor?.swatchHex ?? '#000000',
-          sizeLabel: size,
-          unitPrice: variant.price,
-          media: variant.media ?? product.media[0]!,
-          maxQuantity: Math.max(1, variant.quantityAvailable ?? 10),
-        }
-      : null;
+  /*
+    Memoised because it is published to the PDP store below. A fresh object
+    every render would push a new value into the store on every render, and
+    every subscriber — the sticky bar — would re-render with it.
+  */
+  const cartInput = useMemo(
+    () =>
+      variant && variant.availableForSale && !needsSize
+        ? {
+            productId: product.id,
+            variantId: variant.id,
+            handle: product.handle,
+            title: product.title,
+            variantTitle: variant.title,
+            colorLabel: selectedColor?.label ?? '',
+            colorHex: selectedColor?.swatchHex ?? '#000000',
+            sizeLabel: size,
+            unitPrice: variant.price,
+            media: variant.media ?? product.media[0]!,
+            maxQuantity: Math.max(1, variant.quantityAvailable ?? 10),
+          }
+        : null,
+    [product, variant, selectedColor, size, needsSize],
+  );
+
+  /*
+    Publish the selection for the mobile sticky bar.
+
+    This panel stays the only writer — the bar merely reads — so there is still
+    exactly one answer to "which size is selected". Cleared on unmount so a
+    selection cannot outlive the page it was made on.
+  */
+  const publish = usePDPStore((state) => state.publish);
+  const clearSelection = usePDPStore((state) => state.clear);
+  useEffect(() => {
+    publish({ input: cartInput, soldOut, needsSize });
+    return clearSelection;
+  }, [publish, clearSelection, cartInput, soldOut, needsSize]);
 
   return (
-    <div className={cn('flex flex-col', className)}>
+    // `@container`: the size grid below sizes itself against THIS panel, not
+    // the viewport. The panel is half a grid track on desktop.
+    <div className={cn('@container flex flex-col', className)}>
       {showVisual && selectedMedia ? (
         <div className="mb-8">
           <ProductVisual
@@ -127,7 +154,7 @@ export function PurchasePanel({
                 aria-label={value.label}
                 title={value.label}
                 className={cn(
-                  'relative size-9 rounded-pill transition-transform duration-[--duration-fast] ease-[--ease-out-back]',
+                  'relative size-9 rounded-pill transition-transform duration-(--duration-fast) ease-(--ease-out-back)',
                   'ring-1 ring-inset ring-white/15',
                   color === value.value &&
                     'ring-2 ring-ember ring-offset-2 ring-offset-surface',
@@ -155,12 +182,29 @@ export function PurchasePanel({
         <fieldset className="mb-8">
           <legend className="label mb-4 flex w-full items-baseline justify-between text-ink-subtle">
             <span>{sizeOption.label}</span>
-            <button type="button" className="text-ink underline decoration-hairline-strong underline-offset-4">
-              {t.product.size}
-            </button>
+            {/*
+              A real destination, and a distinct label.
+
+              This was a `<button>` with no `onClick` — nothing happened when
+              you pressed it — carrying `t.product.size`, the SAME string as
+              the legend beside it, so the picker read "TALLA  TALLA". It now
+              says "Guía de tallas" and goes to the size guide, which exists.
+            */}
+            <Link
+              href={routes.sizeGuide(locale)}
+              className="text-ink underline decoration-hairline-strong underline-offset-4 transition-colors duration-(--duration-fast) hover:decoration-ember"
+            >
+              {t.product.sizeGuide}
+            </Link>
           </legend>
 
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {/*
+            Six across only once the panel itself is wide enough. `sm:` was a
+            viewport query — true from 640px — so at a 1024px viewport the six
+            buttons were crammed into a 421px column at 3.4rem each with their
+            labels touching the borders.
+          */}
+          <div className="grid grid-cols-3 gap-2 @sm:grid-cols-6">
             {sizeOption.values.map((value) => (
               <button
                 key={value.value}
@@ -169,7 +213,7 @@ export function PurchasePanel({
                 onClick={() => setSize(value.value)}
                 aria-pressed={size === value.value}
                 className={cn(
-                  'label flex h-11 items-center justify-center border transition-colors duration-[--duration-fast]',
+                  'label flex h-11 items-center justify-center border transition-colors duration-(--duration-fast)',
                   size === value.value
                     ? 'border-ink bg-paper text-void'
                     : 'border-hairline-strong text-ink-muted hover:border-mist hover:text-ink',

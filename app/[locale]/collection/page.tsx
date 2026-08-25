@@ -72,8 +72,14 @@ export default async function CollectionPage({
   return (
     <main id="main" className="pt-28 lg:pt-36">
       <header className="editorial mb-12">
+        {/*
+          The eyebrow names the SECTION; the h1 names the collection. It used
+          to print `activeCollection.handle`, so a Spanish visitor browsing
+          outerwear read the raw English slug "outerwear" above "Exterior" —
+          an internal identifier leaking into the page.
+        */}
         <Reveal>
-          <Eyebrow>{activeCollection?.handle ?? 'all'}</Eyebrow>
+          <Eyebrow>{t.collection.title}</Eyebrow>
         </Reveal>
 
         <RevealText as="h1" driver="css" split="none" className="text-display mt-6 font-medium text-ink">

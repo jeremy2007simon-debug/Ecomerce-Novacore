@@ -63,7 +63,7 @@ export default async function DashboardPage({
   const d = t.dashboard;
 
   return (
-    <main id="main" className="pb-[--spacing-section] pt-24 lg:pt-28">
+    <main id="main" className="pb-(--spacing-section) pt-24 lg:pt-28">
       {/* ── DEMO BANNER — first thing on the page ────────────────────────── */}
       <div className="editorial">
         <div className="flex flex-col gap-3 rounded-xs border border-ember/30 bg-ember/[0.07] p-5 sm:flex-row sm:items-center">

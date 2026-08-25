@@ -65,6 +65,20 @@ export function ReviewList({
     }
   }, [reviews, sort, rating]);
 
+  /*
+    The rating filter offers exactly the ratings that exist in this set.
+
+    It used to hardcode 5/4/3, which was wrong in both directions: the one
+    thing a shopper most wants from a review filter — show me the bad ones —
+    was missing, and a product whose reviews are all 4★ and 5★ still offered a
+    3★ button that could only ever return "no reviews match that filter". A
+    filter that leads to an empty state is worse than no filter.
+  */
+  const available = useMemo(
+    () => [5, 4, 3, 2, 1].filter((star) => reviews.some((review) => review.rating === star)),
+    [reviews],
+  );
+
   const sorts: { key: Sort; label: string }[] = [
     { key: 'recent', label: copy.sortRecent },
     { key: 'helpful', label: copy.sortHelpful },
@@ -105,7 +119,7 @@ export function ReviewList({
           >
             {copy.showAll}
           </button>
-          {[5, 4, 3].map((star) => (
+          {available.map((star) => (
             <button
               key={star}
               type="button"

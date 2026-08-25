@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'motion/react';
 import * as m from 'motion/react-m';
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
@@ -57,6 +58,7 @@ function SearchPanel({
   onClose: () => void;
 }) {
   const { t, locale, fmt } = useLocale();
+  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -95,12 +97,35 @@ function SearchPanel({
       </div>
 
       <div className="gutter flex grow flex-col overflow-y-auto overscroll-contain pb-10">
-        {/* A large, unadorned input on a hairline. No box, no rounded field. */}
-        <div className="flex items-center gap-4 border-b border-hairline-strong pb-5">
+        {/*
+          A real <form>, and a large unadorned input on a hairline.
+
+          It used to be a bare input, so Enter — the single most natural thing
+          to press after typing a query — did nothing at all. Submitting now
+          goes to `/search?q=…`, the server-rendered results page that already
+          existed and that nothing in the app linked to: `routes.search` had
+          zero call sites. The overlay stays the fast path; the page is what
+          makes a query shareable, bookmarkable and reachable without JS.
+        */}
+        <form
+          role="search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const term = query.trim();
+            if (!term) return;
+            router.push(routes.search(locale, term));
+            onClose();
+          }}
+          className="flex items-center gap-4 border-b border-hairline-strong pb-5"
+        >
           <IconSearch className="size-6 shrink-0 text-ink-subtle" />
           <input
             ref={inputRef}
+            // Focused when the overlay opens. Without it the trap takes the
+            // first focusable in DOM order, which is the close button.
+            data-autofocus
             type="search"
+            name="q"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t.search.placeholder}
@@ -120,7 +145,7 @@ function SearchPanel({
               {t.search.clear}
             </button>
           ) : null}
-        </div>
+        </form>
 
         <p className="label mt-5 text-ink-subtle" aria-live="polite">
           {hasQuery ? fmt(t.search.resultCount, { count: results.length }) : t.search.placeholder}

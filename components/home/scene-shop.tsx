@@ -30,7 +30,7 @@ export function SceneShop({
   return (
     <section
       id="collection"
-      className="editorial relative py-[--spacing-section] [content-visibility:auto] [contain-intrinsic-size:auto_1400px]"
+      className="editorial relative py-(--spacing-section) [content-visibility:auto] [contain-intrinsic-size:auto_1400px]"
     >
       <header className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between">
         <div>
@@ -49,7 +49,7 @@ export function SceneShop({
             className="group mt-6 inline-flex items-center gap-3 border-b border-hairline-strong pb-2 transition-colors hover:border-ember"
           >
             <span className="label text-ink">{copy.cta}</span>
-            <IconArrowRight className="size-4 text-ember transition-transform duration-[--duration-base] ease-[--ease-out-expo] group-hover:translate-x-1" />
+            <IconArrowRight className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-x-1" />
           </Link>
         </Reveal>
       </header>

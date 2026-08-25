@@ -42,7 +42,7 @@ export function SiteHeader({
   return (
     <header
       className={cn(
-        'fixed inset-x-0 top-0 z-(--z-header) transition-[background-color,border-color,backdrop-filter] duration-[--duration-base]',
+        'fixed inset-x-0 top-0 z-(--z-header) transition-[background-color,border-color,backdrop-filter] duration-(--duration-base)',
         scrolled
           ? 'border-b border-hairline bg-void/72 backdrop-blur-xl'
           : 'border-b border-transparent bg-transparent',

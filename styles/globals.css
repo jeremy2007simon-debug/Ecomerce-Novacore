@@ -148,6 +148,27 @@
   padding-inline: var(--spacing-gutter);
 }
 
+/*
+   Inline padding that lands on the SAME edge as `.editorial`'s content box,
+   for full-bleed rows that must still line up with the editorial grid.
+
+   `.editorial` is capped at `--container-editorial` and centred, so past that
+   width its content edge is the centring margin PLUS the gutter — while a
+   plain `gutter` stays pinned to the viewport. The editorial gallery is
+   full-bleed by design (frames must run off the right edge) but its `Rule`
+   sits inside `.editorial`, and above 1456px the two were ~300px apart.
+
+   `scroll-padding` carries the same inset so a snapped frame keeps the margin
+   instead of jamming against the scrollport edge.  */
+@utility edge {
+  --edge-inset: max(
+    var(--spacing-gutter),
+    calc((100% - var(--container-editorial)) / 2 + var(--spacing-gutter))
+  );
+  padding-inline: var(--edge-inset);
+  scroll-padding-inline: var(--edge-inset);
+}
+
 @utility reading {
   width: 100%;
   max-width: var(--container-reading);

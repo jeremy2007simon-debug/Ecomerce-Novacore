@@ -77,6 +77,16 @@ export interface ProductVisualProps {
   className?: string;
   /** Suppresses the vignette where the visual sits inside another frame. */
   bare?: boolean;
+  /**
+   * Fill the parent instead of imposing the media's own aspect ratio.
+   *
+   * The parent then owns the box. Used by the editorial gallery, where every
+   * frame must share one height and vary in width — a landscape crop in a row
+   * of portraits should be WIDER, not shorter. Letting each visual apply its
+   * own aspect there produced a 3/2 frame half the height of its neighbours
+   * with its caption floating 300px above the rest.
+   */
+  fill?: boolean;
 }
 
 export function ProductVisual({
@@ -86,6 +96,7 @@ export function ProductVisual({
   tint,
   className,
   bare = false,
+  fill = false,
 }: ProductVisualProps) {
   const alt = media.kind === 'image' ? media.altText : media.alt;
 
@@ -99,8 +110,8 @@ export function ProductVisual({
         // `overflow-clip`, not `overflow-hidden`: hidden creates a scroll
         // container, which kills any position:sticky ancestor further up. The
         // PDP's sticky product column depends on this.
-        'pv-shell relative isolate w-full overflow-clip rounded-xs bg-surface-inset',
-        ASPECT_CLASS[media.aspect],
+        'pv-shell relative isolate overflow-clip rounded-xs bg-surface-inset',
+        fill ? 'h-full w-full' : cn('w-full', ASPECT_CLASS[media.aspect]),
         className,
       )}
       style={style}

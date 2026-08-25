@@ -7,6 +7,7 @@ import { DemoBadge } from '@/components/ui/demo-badge';
 import { ContourField } from '@/components/visual/contour-field';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { routes } from '@/lib/utils/routes';
+import type { DeliveryMethod } from './checkout-machine';
 
 /**
  * ORDER CONFIRMED.
@@ -19,13 +20,33 @@ import { routes } from '@/lib/utils/routes';
  * The DEMO badge is prominent here on purpose: a convincing confirmation screen
  * is exactly where someone might forget nothing was actually purchased.
  */
-export function Confirmation({ orderId, email }: { orderId: string; email: string }) {
+export function Confirmation({
+  orderId,
+  email,
+  delivery,
+}: {
+  orderId: string;
+  email: string;
+  delivery: DeliveryMethod;
+}) {
   const { t, locale, fmt } = useLocale();
 
+  /*
+    The delivery row reports what was actually chosen. It used to be hardcoded
+    to Express, so a shopper who deliberately picked Standard — and was charged
+    for Standard on the very summary beside it — was told at the end that their
+    order was shipping Express.
+  */
   const rows = [
     { label: t.checkout.orderNumber, value: `#${orderId}` },
     { label: t.checkout.email, value: email },
-    { label: t.checkout.deliveryMethod, value: `${t.checkout.express} · ${t.checkout.expressTime}` },
+    {
+      label: t.checkout.deliveryMethod,
+      value:
+        delivery === 'express'
+          ? `${t.checkout.express} · ${t.checkout.expressTime}`
+          : `${t.checkout.standard} · ${t.checkout.standardTime}`,
+    },
   ];
 
   return (

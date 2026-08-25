@@ -136,6 +136,18 @@
   --spacing-section: clamp(5rem, 14vh, 11rem);
   --spacing-scene-gap: clamp(6rem, 22svh, 16rem);
 
+  /*
+     Vertical space the mobile sticky buy bar occupies.
+
+     That bar is `position: fixed`, so it reserves no layout space and silently
+     covers whatever sits at the bottom of the viewport — it was hiding the
+     feature-scene progress ticks on a 390px screen. Anything that must stay
+     clear of it pads by this token instead of guessing a pixel value.
+
+     Derived from the bar's own parts, which it applies from this same token:
+     top padding + control height + the safe-area inset it pads for.  */
+  --spacing-buy-bar: calc(0.75rem + 2.75rem + max(1rem, env(safe-area-inset-bottom)));
+
   --container-editorial: 82rem;
   --container-reading: 38rem;
 

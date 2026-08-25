@@ -51,6 +51,15 @@ export interface SceneLayerOutputs {
   y?: Keyframes;
   x?: Keyframes;
   scale?: Keyframes;
+  /**
+   * Horizontal-only scale.
+   *
+   * Needed for anything that fills along one axis — progress rails, meters,
+   * underlines. Uniform `scale` on a 1px-tall bar shrinks its height too, so a
+   * half-filled rail rendered as a sub-pixel line that all but disappeared.
+   */
+  scaleX?: Keyframes;
+  scaleY?: Keyframes;
   rotate?: Keyframes;
   /** clip-path inset from the top, as a percentage. Used for masked reveals. */
   clipTop?: Keyframes;
@@ -106,6 +115,8 @@ export function SceneLayer({
   const y = useOutput(progress, from, to.y, 0);
   const x = useOutput(progress, from, to.x, 0);
   const scale = useOutput(progress, from, to.scale, 1);
+  const scaleX = useOutput(progress, from, to.scaleX, 1);
+  const scaleY = useOutput(progress, from, to.scaleY, 1);
   const rotate = useOutput(progress, from, to.rotate, 0);
   const clipTop = useOutput(progress, from, to.clipTop, 0);
   const clipBottom = useOutput(progress, from, to.clipBottom, 0);
@@ -118,6 +129,28 @@ export function SceneLayer({
       `inset(${top ?? 0}% -6% ${bottom ?? 0}% -6%)`,
   );
 
+  /*
+    A faded-out layer must not be clickable.
+
+    `opacity: 0` hides an element visually and changes nothing about hit
+    testing, so the home page's scene-02 CTA — a real link to the product —
+    was clickable through the whole scene before it appeared, and swallowed
+    clicks meant for what was underneath it. Its two sibling layers carried
+    `pointer-events-none` in their class list; this one did not, and that is
+    precisely the kind of thing that gets forgotten one layer at a time.
+
+    Driving it from the same MotionValue as the opacity makes it structural
+    rather than remembered: any layer that fades is inert while faded, and a
+    layer that does not animate opacity is untouched.
+
+    `inherit` rather than `auto` when visible, deliberately. Several scenes
+    wrap their layers in a `pointer-events-none` container on purpose — the
+    scene-02 feature callouts among them — and `auto` would override that
+    intent from below. `inherit` re-enables hit testing only where the ancestor
+    chain already allowed it.
+  */
+  const pointerEvents = useTransform(opacity, (value) => (value > 0.5 ? 'inherit' : 'none'));
+
   const Component = m[as];
   const useClip = to.clipTop !== undefined || to.clipBottom !== undefined;
 
@@ -125,10 +158,12 @@ export function SceneLayer({
     <Component
       className={cn(promote && 'atl-promote', className)}
       style={{
-        ...(to.opacity ? { opacity } : {}),
+        ...(to.opacity ? { opacity, pointerEvents } : {}),
         ...(to.y ? { y } : {}),
         ...(to.x ? { x } : {}),
         ...(to.scale ? { scale } : {}),
+        ...(to.scaleX ? { scaleX } : {}),
+        ...(to.scaleY ? { scaleY } : {}),
         ...(to.rotate ? { rotate } : {}),
         ...(useClip ? { clipPath } : {}),
       }}

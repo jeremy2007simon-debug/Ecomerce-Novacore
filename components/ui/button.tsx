@@ -51,7 +51,7 @@ export function Button<T extends ElementType = 'button'>({
       className={cn(
         'group relative inline-flex items-center justify-center gap-2.5',
         'font-mono uppercase tracking-[0.18em]',
-        'transition-[background-color,border-color,color,transform] duration-[--duration-fast] ease-[--ease-out-quart]',
+        'transition-[background-color,border-color,color,transform] duration-(--duration-fast) ease-(--ease-out-quart)',
         'active:scale-[0.985] disabled:pointer-events-none disabled:opacity-40',
         VARIANTS[variant],
         SIZES[size],

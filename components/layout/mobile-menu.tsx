@@ -75,7 +75,7 @@ export function MobileMenu({
                   className="group flex items-baseline justify-between gap-6 py-2"
                 >
                   <span className="text-headline font-medium text-ink">{link.label}</span>
-                  <IconArrowRight className="size-5 shrink-0 -translate-x-2 text-ember opacity-0 transition-all duration-[--duration-base] group-hover:translate-x-0 group-hover:opacity-100" />
+                  <IconArrowRight className="size-5 shrink-0 -translate-x-2 text-ember opacity-0 transition-all duration-(--duration-base) group-hover:translate-x-0 group-hover:opacity-100" />
                 </Link>
               </m.div>
             </li>

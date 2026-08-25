@@ -28,10 +28,19 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active: boolean
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
 
-    // Focus the first sensible target. rAF because the element may still be
-    // animating in and an invisible element cannot take focus.
+    /*
+      Focus the first sensible target. rAF because the element may still be
+      animating in and an invisible element cannot take focus.
+
+      `[data-autofocus]` wins when a panel marks one. In DOM order the first
+      focusable in a full-screen overlay is its CLOSE button — so opening
+      search put the caret on "close" and the shopper had to Tab before they
+      could type. The opt-in keeps every other overlay behaving exactly as it
+      does today; only a panel that names its own target changes.
+    */
     const frame = requestAnimationFrame(() => {
-      const first = container.querySelector<HTMLElement>(FOCUSABLE);
+      const preferred = container.querySelector<HTMLElement>('[data-autofocus]');
+      const first = preferred ?? container.querySelector<HTMLElement>(FOCUSABLE);
       (first ?? container).focus({ preventScroll: true });
     });
 

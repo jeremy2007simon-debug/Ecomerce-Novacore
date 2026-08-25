@@ -118,7 +118,13 @@ export function CheckoutFlow({ title }: { title: string }) {
   // Replaces the whole page including its heading — leaving "Checkout" standing
   // above a confirmed order describes the wrong screen.
   if (state.step === 'confirmation' && state.orderId) {
-    return <Confirmation orderId={state.orderId} email={state.fields.email} />;
+    return (
+      <Confirmation
+        orderId={state.orderId}
+        email={state.fields.email}
+        delivery={state.delivery}
+      />
+    );
   }
 
   /* ── Empty cart ───────────────────────────────────────────────────────── */

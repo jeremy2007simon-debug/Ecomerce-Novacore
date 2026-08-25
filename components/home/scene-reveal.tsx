@@ -113,7 +113,7 @@ export function SceneReveal({
                 <span className="label text-ember" data-numeric>
                   {formatMoney(product.priceRange.min, locale)}
                 </span>
-                <IconArrowRight className="size-4 text-ember transition-transform duration-[--duration-base] ease-[--ease-out-expo] group-hover:translate-x-1" />
+                <IconArrowRight className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-x-1" />
               </Link>
             </div>
           </SceneLayer>
