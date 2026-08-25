@@ -83,11 +83,10 @@ for (const [handle, mustNotContain, mustContain] of [
   const details = page.locator('details', { hasText: 'Cuidados' }).first();
   await details.locator('summary').click();
   await page.waitForTimeout(200);
-  // Scoped to the Care disclosure itself — the page also carries a fixed Ask
-  // Atlantic suggestion chip ("¿Cómo se lava la membrana?") that mentions
-  // "membrana" on every product regardless of its own care copy, which a
-  // whole-page text search would wrongly pick up as this product's own care
-  // instructions.
+  // Scoped to the Care disclosure itself, not the whole page — a shopper can
+  // freely type a membrane/DWR question into Ask Atlantic on any PDP, and
+  // that answer text living elsewhere on the page must not be picked up by a
+  // whole-page text search as this product's own care instructions.
   const careText = (await details.innerText()).toLowerCase();
   const hasBad = careText.includes(mustNotContain.toLowerCase());
   const hasGood = careText.includes(mustContain.toLowerCase());
@@ -221,6 +220,89 @@ console.log('\n=== CONSOLE ===');
   const real = issues.filter((m) => !m.includes('ERR_ABORTED'));
   if (real.length === 0) ok('console clean across all changed routes');
   else bad(`console errors: ${real.join(' | ')}`);
+}
+
+/* ── Ask Atlantic — suggestion chips are category-correct ────────────────── */
+console.log('\n=== ASK ATLANTIC — per-category suggestion chips ===');
+{
+  const CASES = [
+    { handle: 'atlantic-01', mustContain: ['impermeable'], mustNotContain: ['capacidad'] },
+    { handle: 'tide-01', mustContain: [], mustNotContain: ['membrana'] },
+    { handle: 'basalt-knit', mustContain: ['pica'], mustNotContain: ['membrana'] },
+    { handle: 'current-bag', mustContain: ['capacidad'], mustNotContain: ['talla'] },
+    { handle: 'north-cap', mustContain: [], mustNotContain: ['membrana'] },
+    { handle: 'atlantic-bottle', mustContain: ['capacidad'], mustNotContain: ['talla', 'membrana'] },
+  ];
+  for (const { handle, mustContain, mustNotContain } of CASES) {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await page.goto(`${B}/es/product/${handle}`, { waitUntil: 'networkidle', timeout: 40000 });
+    const chips = await page
+      .locator('section[aria-labelledby="ask-atlantic-heading"] button')
+      .allInnerTexts();
+    const chipText = chips.join(' | ').toLowerCase();
+
+    const missingGood = mustContain.filter((w) => !chipText.includes(w));
+    const foundBad = mustNotContain.filter((w) => chipText.includes(w));
+    if (missingGood.length === 0 && foundBad.length === 0) {
+      ok(`${handle} — suggestion chips category-correct (${chips.length} chips)`);
+    } else {
+      bad(
+        `${handle} — chips "${chips.join(' / ')}" missing ${JSON.stringify(missingGood)}, contains forbidden ${JSON.stringify(foundBad)}`,
+      );
+    }
+    await page.close();
+  }
+
+  // Cross-product: no two products should render an identical chip set — the
+  // whole point of this change was replacing one global list with per-form
+  // ones.
+  const seen = new Map();
+  for (const handle of [
+    'atlantic-01',
+    'tide-01',
+    'volcanic-tee',
+    'basalt-knit',
+    'trade-pant',
+    'current-bag',
+    'north-cap',
+    'atlantic-bottle',
+  ]) {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    await page.goto(`${B}/es/product/${handle}`, { waitUntil: 'networkidle', timeout: 40000 });
+    const chips = await page
+      .locator('section[aria-labelledby="ask-atlantic-heading"] button')
+      .allInnerTexts();
+    const key = chips.join('|');
+    if (seen.has(key)) bad(`${handle} — same chip set as ${seen.get(key)} (chips are not per-category)`);
+    else ok(`${handle} — chip set is unique`);
+    seen.set(key, handle);
+    await page.close();
+  }
+}
+
+/* ── Newsletter — demo disclosure collapsed by default ───────────────────── */
+console.log('\n=== NEWSLETTER DISCLOSURE ===');
+{
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  await page.goto(`${B}/es`, { waitUntil: 'networkidle', timeout: 40000 });
+
+  const badgeVisible = await page.locator('footer').locator('text=DEMO').first().isVisible();
+  const demoTextLocator = page.locator('footer').locator('text=Formulario de demostración');
+  const bodyVisibleBefore =
+    (await demoTextLocator.count()) > 0 && (await demoTextLocator.first().isVisible());
+
+  if (badgeVisible) ok('newsletter DEMO badge visible by default');
+  else bad('newsletter DEMO badge not visible by default');
+  if (!bodyVisibleBefore) ok('newsletter demo sentence collapsed by default');
+  else bad('newsletter demo sentence visible before opening the disclosure');
+
+  await page.locator('footer details summary').first().click();
+  await page.waitForTimeout(200);
+  const bodyVisibleAfter = await demoTextLocator.first().isVisible();
+  if (bodyVisibleAfter) ok('newsletter demo sentence reachable after opening the disclosure');
+  else bad('newsletter demo sentence still not visible after opening the disclosure');
+
+  await page.close();
 }
 
 await browser.close();

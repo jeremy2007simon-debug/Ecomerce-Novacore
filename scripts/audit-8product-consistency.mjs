@@ -54,10 +54,18 @@ for (const handle of HANDLES) {
   const careText = (await careDetails.innerText()).toLowerCase();
   const mentionsMembrane = careText.includes('membrana');
 
+  // Ask Atlantic suggestion chips must be per-form, not one global list —
+  // check the actual chip words, not just that some chips exist.
+  const chips = await askSection.locator('button').allInnerTexts();
+  const chipText = chips.join(' | ').toLowerCase();
+  const chipsHasMembrane = chipText.includes('membrana');
+  const chipsHasCapacity = chipText.includes('capacidad');
+  const chipsHasTalla = chipText.includes('talla');
+
   const expectedSelectSize = hasSize ? 1 : 0;
   console.log(
     `${handle.padEnd(16)} size=${hasSize ? 'y' : 'n'}  ` +
-      `selectSize=${selectSizeVisible}  ask(tagline=${askTagline ? 'y' : 'n'},details=${askDetails ? 'y' : 'n'})  ` +
+      `selectSize=${selectSizeVisible}  ask(tagline=${askTagline ? 'y' : 'n'},details=${askDetails ? 'y' : 'n'},chips=${chips.length})  ` +
       `matchedOn=${matchedOnVisible}  fit=${fitVisible ? 'y' : 'n'}  careMembrane=${mentionsMembrane ? 'y' : 'n'}`,
   );
 
@@ -69,6 +77,15 @@ for (const handle of HANDLES) {
   if (fitVisible !== hasSize) bad(`${handle} — fit meter visible=${fitVisible}, expected ${hasSize}`);
   if (mentionsMembrane && handle !== 'atlantic-01') bad(`${handle} — care copy mentions membrana, not a membrane product`);
   if (!mentionsMembrane && handle === 'atlantic-01') bad(`atlantic-01 — care copy dropped its membrane instructions`);
+  if (chipsHasMembrane && handle !== 'atlantic-01')
+    bad(`${handle} — suggestion chip mentions membrana, not the membrane product`);
+  if (handle === 'atlantic-bottle' && (chipsHasTalla || chipsHasMembrane))
+    bad('atlantic-bottle — suggestion chip asks about size/fit/membrane');
+  if (
+    ['atlantic-01', 'tide-01', 'volcanic-tee', 'basalt-knit', 'trade-pant'].includes(handle) &&
+    chipsHasCapacity
+  )
+    bad(`${handle} — apparel product has a capacity/strap suggestion chip`);
 
   await page.close();
 }

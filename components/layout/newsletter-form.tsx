@@ -22,7 +22,7 @@ import { DemoBadge } from '@/components/ui/demo-badge';
 export function NewsletterForm({
   copy,
 }: {
-  copy: { placeholder: string; cta: string; demo: string };
+  copy: { placeholder: string; cta: string; demo: string; infoLabel: string };
 }) {
   const id = useId();
   const [value, setValue] = useState('');
@@ -65,8 +65,20 @@ export function NewsletterForm({
         {...(sent ? { role: 'status' } : {})}
       >
         <DemoBadge />
-        {copy.demo}
       </p>
+
+      <details className="group mt-2">
+        <summary className="label inline-flex cursor-pointer list-none items-center gap-2 text-ink-subtle [&::-webkit-details-marker]:hidden">
+          {copy.infoLabel}
+          <span
+            aria-hidden="true"
+            className="text-[0.625rem] transition-transform duration-(--duration-fast) group-open:rotate-180"
+          >
+            ▾
+          </span>
+        </summary>
+        <p className="reading mt-2 text-small text-ink-muted">{copy.demo}</p>
+      </details>
     </>
   );
 }

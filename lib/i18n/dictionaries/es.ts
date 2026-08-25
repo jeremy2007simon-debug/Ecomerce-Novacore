@@ -292,6 +292,7 @@ export const es: Dictionary = {
       newsletterPlaceholder: 'Correo electrónico',
       newsletterCta: 'Suscribirse',
       newsletterDemo: 'Formulario de demostración: no se guarda ni se envía ninguna dirección.',
+      newsletterInfoLabel: 'Sobre esta demo',
       shop: 'Tienda',
       about: 'Marca',
       help: 'Ayuda',

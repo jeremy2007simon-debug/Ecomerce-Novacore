@@ -51,7 +51,7 @@ export function AskAtlantic({
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
   const [pending, setPending] = useState(false);
 
-  const suggestions = suggestionsFor(locale);
+  const suggestions = suggestionsFor(locale, product.form);
 
   const ask = async (text: string) => {
     const trimmed = text.trim();

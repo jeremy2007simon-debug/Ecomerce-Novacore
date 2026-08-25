@@ -166,6 +166,66 @@ export const ASSISTANT_INTENTS: AssistantIntent[] = [
     },
     cites: ['atlantic-01', 'tide-01'],
   },
+  {
+    id: 'knit-comfort',
+    keywords: {
+      es: ['pica', 'picor', 'aspera', 'suave', 'suavidad', 'irrita', 'regula', 'abriga', 'transpira'],
+      en: ['itchy', 'itch', 'scratchy', 'irritate', 'soft', 'softness', 'regulate', 'warm', 'breathe', 'breathable'],
+    },
+    answer: {
+      es: 'BASALT KNIT es merino de 19,5 micras — lo bastante fino para no picar sobre la piel, a diferencia de una lana estándar. La misma fibra regula la temperatura: abriga con frío y transpira con calor. El punto de 14 galgas es lo que le da forma, no lo que roza.',
+      en: 'BASALT KNIT is 19.5 micron merino — fine enough not to itch against skin, unlike a standard wool. The same fibre regulates temperature: warm in the cold, breathable in the heat. The 14-gauge knit is what holds its shape, not what causes friction.',
+    },
+    cites: ['basalt-knit'],
+  },
+  {
+    id: 'bag-details',
+    keywords: {
+      es: ['capacidad', 'cabe', 'litros', 'movil', 'cartera', 'portatil', 'llaves', 'correa', 'ajustable', 'ajustar'],
+      en: ['capacity', 'fits', 'litre', 'liter', 'phone', 'wallet', 'keys', 'laptop', 'strap', 'adjustable', 'adjust'],
+    },
+    answer: {
+      es: 'CURRENT BAG son 4 litros: caben el móvil, la cartera, las llaves, un libro pequeño y una botella de medio litro — no un portátil, es para lo esencial. La correa se ajusta de 70 a 140 cm y se cambia sin herramientas.',
+      en: 'CURRENT BAG holds 4 litres: phone, wallet, keys, a small book and a half-litre bottle fit — not a laptop, it is built for the essential. The strap adjusts from 70 to 140 cm and swaps without tools.',
+    },
+    cites: ['current-bag'],
+  },
+  {
+    id: 'cap-breathability',
+    keywords: {
+      es: ['transpirable', 'transpira', 'ventilacion', 'sofoco', 'sudor', 'calor'],
+      en: ['breathable', 'breathability', 'ventilation', 'sweat', 'hot', 'heat'],
+    },
+    answer: {
+      es: 'La banda interior de NORTH CAP es tejido técnico absorbente, no algodón — gestiona el sudor en vez de empaparse, y el ripstop reciclado del exterior no retiene calor como un algodón grueso.',
+      en: "NORTH CAP's inner band is a technical wicking fabric, not cotton — it manages sweat instead of soaking it up, and the recycled ripstop shell does not trap heat the way heavy cotton would.",
+    },
+    cites: ['north-cap'],
+  },
+  {
+    id: 'bottle-thermal',
+    keywords: {
+      es: ['frio', 'caliente', 'horas', 'retiene', 'aislamiento', 'termo', 'vacio'],
+      en: ['cold', 'hot', 'hours', 'retains', 'insulated', 'vacuum'],
+    },
+    answer: {
+      es: 'ATLANTIC BOTTLE mantiene el frío 24 horas y el calor 12 — acero inoxidable de doble pared con vacío entre las paredes, no espuma. El calor se escapa más rápido que el frío en cualquier aislamiento al vacío, de ahí la diferencia.',
+      en: 'ATLANTIC BOTTLE holds cold for 24 hours and hot for 12 — double-walled stainless steel with a vacuum between the walls, not foam. Heat escapes faster than cold through any vacuum insulation, which is the reason for the gap.',
+    },
+    cites: ['atlantic-bottle'],
+  },
+  {
+    id: 'bottle-capacity',
+    keywords: {
+      es: ['capacidad', 'litros', 'ml', 'cuanto le cabe', 'medio litro'],
+      en: ['capacity', 'ml', 'holds', 'volume', 'half litre', 'half liter'],
+    },
+    answer: {
+      es: 'Medio litro exacto — 500 ml. Pesa 295 g vacía y la boca de 52 mm admite cubitos de hielo normales.',
+      en: 'Exactly half a litre — 500 ml. It weighs 295 g empty, and the 52 mm mouth takes standard ice cubes.',
+    },
+    cites: ['atlantic-bottle'],
+  },
 ];
 
 /**
@@ -197,18 +257,161 @@ export const SIZELESS_SIZE_OVERRIDE: Partial<Record<ProductForm, Localized<strin
   },
 };
 
-/** Prompt chips offered before the visitor types anything. */
-export const ASSISTANT_SUGGESTIONS: Localized<string[]> = {
-  es: [
-    '¿Qué me pongo para 15–20 °C?',
-    '¿Qué talla elijo si mido 182 cm?',
-    '¿Diferencia entre ATLANTIC 01 y TIDE 01?',
-    '¿Cómo se lava la membrana?',
-  ],
-  en: [
-    'What should I wear for 15–20 °C?',
-    'What size should I choose at 182 cm?',
-    'Difference between ATLANTIC 01 and TIDE 01?',
-    'How do I wash the membrane?',
-  ],
+/**
+ * Overrides the generic `care` answer above (written for the ATLANTIC 01's
+ * membrane) on every form that has no membrane to wash — same "branch on
+ * structural category" pattern as `SIZELESS_SIZE_OVERRIDE`. `shell` is the
+ * only form absent here: its `care` answer already is the correct one.
+ */
+export const CARE_FORM_OVERRIDE: Partial<Record<ProductForm, Localized<string>>> = {
+  overshirt: {
+    es: 'La TIDE 01 no lleva membrana — es sarga algodón-nylon. Lava a máquina a 30 °C con colores similares, sin lejía, y sécala en tendedero en vez de secadora; la secadora es lo que más la deforma.',
+    en: 'The TIDE 01 has no membrane — it is a cotton-nylon twill. Machine wash at 30 °C with similar colours, no bleach, and line dry rather than tumble dry — the dryer is what warps it fastest.',
+  },
+  tee: {
+    es: 'La VOLCANIC TEE es algodón orgánico peinado de 240 g/m². Lávala del revés a 30 °C, sin lejía; la secadora a baja temperatura no le afecta, y plancharla del revés conserva mejor el tinte.',
+    en: 'The VOLCANIC TEE is 240 gsm combed organic cotton. Wash it inside out at 30 °C, no bleach; a low-heat tumble dry is fine, and ironing inside out keeps the dye looking newer for longer.',
+  },
+  knit: {
+    es: 'El merino de BASALT KNIT va en programa lana a 30 °C, sin lejía, y se seca en horizontal a la sombra — colgarlo deforma los hombros. Plancha a temperatura media si hace falta.',
+    en: "BASALT KNIT's merino goes on a wool cycle at 30 °C, no bleach, and dries flat in the shade — hanging it stretches the shoulders out of shape. Iron on medium if needed.",
+  },
+  pant: {
+    es: 'TRADE PANT se lava del revés a 30 °C, sin lejía ni suavizante — el suavizante degrada el elastano, no una membrana. Sécalo al aire; una secadora a alta temperatura sí puede dañar la cinturilla elástica.',
+    en: 'TRADE PANT washes inside out at 30 °C, no bleach or fabric softener — softener degrades the elastane, not a membrane. Air dry it; high-heat tumble drying can damage the elastic waistband.',
+  },
+  bag: {
+    es: 'CURRENT BAG se limpia con un paño húmedo — no va a la lavadora. Seca el Cordura® por completo antes de guardarla; la hebilla de aluminio anodizado no necesita mantenimiento.',
+    en: 'CURRENT BAG cleans with a damp cloth — it does not go in the washing machine. Dry the Cordura® fully before storing it; the anodised aluminium buckle needs no maintenance.',
+  },
+  cap: {
+    es: 'NORTH CAP se lava a mano con agua fría — la lavadora deforma la visera. Sécala al aire sobre su forma, nunca en secadora, y reactiva el DWR con plancha tibia sin vapor si el agua deja de perlar.',
+    en: 'NORTH CAP hand washes in cold water — a washing machine warps the brim. Air dry it on its shape, never in a dryer, and reactivate the DWR with a warm iron and no steam if water stops beading.',
+  },
+  bottle: {
+    es: 'ATLANTIC BOTTLE se enjuaga por dentro después de cada uso y se lava a mano — no es apta para lavavajillas. Guárdala con el tapón abierto para que no coja olores, y revisa la junta de la tapa de vez en cuando: hay repuesto disponible.',
+    en: 'ATLANTIC BOTTLE rinses inside after every use and hand washes — it is not dishwasher safe. Store it with the lid off so it does not pick up odours, and check the lid gasket occasionally: a spare is available.',
+  },
+};
+
+/**
+ * Prompt chips offered before the visitor types anything, keyed by the
+ * product's structural `form` rather than its handle. A bag should never
+ * suggest a clothing-size question and a bottle should never surface
+ * membrane/DWR language — this table is what keeps that true without a
+ * branch on product name anywhere in the component.
+ */
+export const ASSISTANT_SUGGESTIONS_BY_FORM: Record<ProductForm, Localized<string[]>> = {
+  shell: {
+    es: [
+      '¿Es impermeable de verdad?',
+      '¿Qué talla elijo si mido 182 cm?',
+      '¿Debo pedir una talla más grande para llevar capas debajo?',
+      '¿Cómo es el lavado de la membrana?',
+    ],
+    en: [
+      'Is it actually waterproof?',
+      'What size should I choose at 182 cm tall?',
+      'Should I size up to fit layers underneath?',
+      'How do I wash and care for the membrane?',
+    ],
+  },
+  overshirt: {
+    es: [
+      '¿Qué talla elijo si mido 182 cm?',
+      '¿Aguanta bien un día de 15 a 20 grados?',
+      '¿La puedo llevar en un día de entretiempo bajo la ATLANTIC 01?',
+      '¿Cómo es el lavado de la TIDE 01?',
+    ],
+    en: [
+      'What size should I choose at 182 cm tall?',
+      'Does it work for a 15 to 20 degree day?',
+      'Can I wear it on a mild day layered under the ATLANTIC 01?',
+      'How do I wash and care for the TIDE 01?',
+    ],
+  },
+  tee: {
+    es: [
+      '¿Qué talla elijo si mido 182 cm?',
+      '¿Debo pedir una talla más grande para un ajuste holgado?',
+      '¿Qué gramaje tiene el tejido de algodón?',
+      '¿Cómo es el lavado de la VOLCANIC TEE?',
+    ],
+    en: [
+      'What size should I choose at 182 cm tall?',
+      'Should I size up for a looser fit?',
+      'How heavy is the cotton fabric?',
+      'How do I wash and care for the VOLCANIC TEE?',
+    ],
+  },
+  knit: {
+    es: [
+      '¿Qué talla elijo si mido 182 cm?',
+      '¿Pica o irrita sobre la piel?',
+      '¿Abriga en frío y transpira en calor?',
+      '¿Cómo es el lavado del merino sin que encoja?',
+    ],
+    en: [
+      'What size should I choose at 182 cm tall?',
+      'Does it itch or feel scratchy on skin?',
+      'Does it stay warm in the cold and breathe in the heat?',
+      'How do I wash and care for the merino without shrinking it?',
+    ],
+  },
+  pant: {
+    es: [
+      '¿Qué talla elijo si mido 182 cm?',
+      '¿Hay margen de medida en la cintura entre tallas?',
+      '¿De qué tejido es?',
+      '¿Cómo es el lavado del TRADE PANT sin dañar el elastano?',
+    ],
+    en: [
+      'What size should I choose at 182 cm tall?',
+      'Is there waist room to fit between two sizes?',
+      'What fabric is it made from?',
+      'How do I wash and care for the TRADE PANT without damaging the elastane?',
+    ],
+  },
+  bag: {
+    es: [
+      '¿Cuánta capacidad tiene la CURRENT BAG?',
+      '¿Me caben el móvil y la cartera?',
+      '¿Cuánto se puede ajustar la correa?',
+      '¿Es resistente al agua si llueve?',
+    ],
+    en: [
+      'How much capacity does the CURRENT BAG have?',
+      'Will my phone and wallet fit inside?',
+      'How much does the strap adjust?',
+      'Is it water resistant if it rains?',
+    ],
+  },
+  cap: {
+    es: [
+      '¿Qué talla o medida tiene la NORTH CAP?',
+      '¿Se ajusta bien si tengo la cabeza grande?',
+      '¿Transpira bien con calor?',
+      '¿Cómo es el lavado o cuidado de la NORTH CAP?',
+    ],
+    en: [
+      'What size or fit is the NORTH CAP?',
+      'Will the size adjustment fit a larger head?',
+      'Is it breathable in the heat?',
+      'How do I wash and care for the NORTH CAP?',
+    ],
+  },
+  bottle: {
+    es: [
+      '¿Cuántas horas mantiene el frío?',
+      '¿Y cuántas horas se mantiene caliente?',
+      '¿Cuál es su capacidad, medio litro?',
+      '¿Cómo es el lavado por dentro?',
+    ],
+    en: [
+      'How many hours does it stay cold?',
+      'And how many hours does it stay hot?',
+      'What is its capacity — half a litre?',
+      'How do I wash and care for the inside?',
+    ],
+  },
 };

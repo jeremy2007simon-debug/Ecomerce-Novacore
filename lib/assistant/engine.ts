@@ -1,4 +1,9 @@
-import { ASSISTANT_INTENTS, ASSISTANT_SUGGESTIONS, SIZELESS_SIZE_OVERRIDE } from '@/data/assistant';
+import {
+  ASSISTANT_INTENTS,
+  ASSISTANT_SUGGESTIONS_BY_FORM,
+  CARE_FORM_OVERRIDE,
+  SIZELESS_SIZE_OVERRIDE,
+} from '@/data/assistant';
 import type { Locale } from '@/types/i18n';
 import type { ProductForm } from '@/types/visual';
 
@@ -86,6 +91,17 @@ export async function answer(
     }
   }
 
+  // The generic `care` answer is written for the ATLANTIC 01's membrane.
+  // Every other form's own PDP Care accordion describes something else
+  // entirely, so a washing question asked from those products gets its own
+  // answer instead — see CARE_FORM_OVERRIDE.
+  if (product && match.id === 'care') {
+    const careOverride = CARE_FORM_OVERRIDE[product.form];
+    if (careOverride) {
+      return { intent: match.id, text: careOverride[locale], cites: [product.handle], matched: true };
+    }
+  }
+
   const intent = ASSISTANT_INTENTS.find((candidate) => candidate.id === match.id);
   if (!intent) {
     return { intent: null, text: '', cites: [], matched: false };
@@ -99,6 +115,6 @@ export async function answer(
   };
 }
 
-export function suggestionsFor(locale: Locale): string[] {
-  return ASSISTANT_SUGGESTIONS[locale];
+export function suggestionsFor(locale: Locale, form: ProductForm): string[] {
+  return ASSISTANT_SUGGESTIONS_BY_FORM[form][locale];
 }
