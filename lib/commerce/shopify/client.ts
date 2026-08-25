@@ -2,22 +2,20 @@ import { NotConfiguredError } from '../repository';
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
- * PRODUCTION INTEGRATION REQUIRED — Shopify Storefront API
- *
- * This file is a COMPILING STUB. It contains no credentials and makes no
- * network calls. It exists to prove that CommerceRepository is implementable
- * against a real backend, and to give whoever wires it up a typed starting
- * point rather than a blank file.
+ * Shopify Storefront API — the fetch wrapper every query and mutation goes
+ * through.
  *
  * To activate:
- *   1. Set SHOPIFY_STORE_DOMAIN and SHOPIFY_STOREFRONT_TOKEN (server-side only —
- *      never NEXT_PUBLIC_*, since those are inlined into the client bundle).
+ *   1. Set SHOPIFY_STORE_DOMAIN and SHOPIFY_STOREFRONT_TOKEN in a gitignored
+ *      .env.local (server-side only — never NEXT_PUBLIC_*, since those are
+ *      inlined into the client bundle).
  *   2. Set COMMERCE_PROVIDER=shopify.
- *   3. Implement the four normalise* functions in ./normalize.ts.
  *
  * The Storefront token is a public-scope token, but it still belongs on the
  * server: exposing it client-side hands anyone an unthrottled read API for the
- * whole catalogue.
+ * whole catalogue. Cart mutations, which are triggered from client
+ * components, reach this file through the Server Actions in ./cart-actions.ts
+ * rather than calling storefront() directly from the browser.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 

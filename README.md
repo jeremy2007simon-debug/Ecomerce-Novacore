@@ -100,22 +100,66 @@ component, and `npm run lint` fails.
 - ASK ATLANTIC — keyword matching over a hand-written knowledge base
 - Analytics — typed events dispatched to in-memory sinks only
 
-### Production integration required
+### Shopify mode (`COMMERCE_PROVIDER=shopify`)
+
+Catalogue, cart and checkout are real once `SHOPIFY_STORE_DOMAIN` and
+`SHOPIFY_STOREFRONT_TOKEN` are set (see `.env.example` — values go in a
+gitignored `.env.local`, never committed). The cart becomes a real Shopify
+Cart (`cartCreate`/`cartLinesAdd`/`cartLinesUpdate`/`cartLinesRemove`), and
+"Proceed to checkout" redirects the browser to the cart's real
+`checkoutUrl` — Shopify's own hosted, off-site checkout, where payment
+actually happens. No separate payment integration lives in this repo; that
+page is Shopify's.
+
+**Metafields the store must define** (Settings → Custom data → Products, or
+via the Admin API), read by `lib/commerce/shopify/normalize.ts`:
+
+| Metafield | Type | Maps to |
+|---|---|---|
+| `spec.subtitle` | Single line text | `Product.subtitle` |
+| `spec.material` | Single line text | `metafields.material` |
+| `spec.composition` | Single line text | `metafields.composition` |
+| `spec.weight_grams` | Integer | `metafields.weightGrams` |
+| `spec.origin` | Single line text | `metafields.origin` |
+| `spec.care` | List of single line text | `metafields.care` |
+| `story.body` | Multi line text | `metafields.story` |
+| `spec.features` | JSON, `[{key,label,detail}]` | `metafields.features` |
+| `spec.specs` | JSON, `[{label,value}]` | `metafields.specs` |
+| `rec.pairs_with` | **List of single line text — product HANDLES, not a product-reference metafield** | `metafields.pairsWith` |
+| `spec.shipping` | Multi line text | `metafields.shipping` |
+| `spec.returns` | Multi line text | `metafields.returns` |
+
+Every field above has a fallback (`''`, `[]`, or `0`) — a product missing a
+metafield still normalizes successfully. There is no Shopify equivalent for
+a product rating object; `rating` defaults to `{value:0, count:0}` rather
+than inventing a number.
+
+**`productType` → the site's internal product category**, used to decide
+which PDP modules apply (a size selector makes no sense on a bottle). Set
+each product's `productType` in the Shopify admin to one of the left-hand
+values below; anything else silently falls back to `tee` (audit your real
+catalogue's `productType` values against this table before going live):
+
+| `productType` (case-insensitive) | Category |
+|---|---|
+| `shell`, `jacket`, `outerwear` | Waterproof shell |
+| `overshirt`, `shirt` | Overshirt |
+| `tee`, `t-shirt` | T-shirt |
+| `knit`, `sweater`, `jumper` | Knitwear |
+| `pant`, `pants`, `trouser`, `trousers` | Trousers |
+| `bag` | Bag (no size option) |
+| `cap`, `hat` | Cap (no size option) |
+| `bottle` | Bottle (no size option) |
+
+### Production integration still required
 
 | Area | What is needed | Where |
 |---|---|---|
-| Catalogue | Implement `normalizeProduct`, set `COMMERCE_PROVIDER=shopify` | `lib/commerce/shopify/` |
-| Payments | A server-side provider; the flow is UI-only today | `components/commerce/checkout/` |
 | AI assistant | Route handler proxying a real model | `lib/assistant/engine.ts` |
 | Analytics | Register a sink mapping `TrackedEvent` to a vendor SDK | `lib/analytics/` |
-| Reviews | Replace fixtures; **remove the demo `aggregateRating`** from JSON-LD | `lib/seo/json-ld.ts` |
+| Reviews | Shopify has no reviews API — this repo intentionally keeps demo review data in both modes rather than inventing one; wire a real reviews provider here if needed | `lib/commerce/reviews.ts` |
 
-The Shopify adapter is written and typed, and every method throws
-`NotConfiguredError`. That is deliberate: the interface is provably
-implementable, the compiler keeps both adapters in step, and nothing can
-silently pretend to be connected to a real store.
-
-`.env.example` documents every variable. All are unset.
+`.env.example` documents every variable. All are unset by default (demo mode).
 
 ---
 

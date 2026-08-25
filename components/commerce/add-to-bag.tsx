@@ -5,8 +5,10 @@ import * as m from 'motion/react-m';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { IconCheck } from '@/components/visual/icons';
+import { useIsDemoMode } from '@/lib/commerce/is-demo-mode';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { useCartStore, type CartInput } from '@/lib/store/cart-store';
+import { useShopifyCartStore } from '@/lib/store/shopify-cart-store';
 import { useUIStore } from '@/lib/store/ui-store';
 import { cn } from '@/lib/utils/cn';
 
@@ -40,8 +42,10 @@ export function AddToBag({
   openDrawer?: boolean;
   className?: string;
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const isDemoMode = useIsDemoMode();
   const add = useCartStore((state) => state.add);
+  const shopifyAdd = useShopifyCartStore((state) => state.add);
   const open = useUIStore((state) => state.open);
   const [added, setAdded] = useState(false);
 
@@ -50,7 +54,15 @@ export function AddToBag({
   const handleClick = () => {
     if (!input) return;
 
-    add(input, 1);
+    if (isDemoMode) {
+      add(input, 1);
+    } else {
+      // Genuinely async — a real cartCreate/cartLinesAdd round trip, not a
+      // simulated delay. The drawer still opens immediately; its line
+      // renders once the mutation resolves.
+      void shopifyAdd(input.variantId, 1, locale, input.handle);
+    }
+
     setAdded(true);
     if (openDrawer) open('cart');
 

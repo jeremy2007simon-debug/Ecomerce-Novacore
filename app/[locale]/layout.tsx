@@ -6,11 +6,13 @@ import { notFound } from 'next/navigation';
 import { AnalyticsContextSync } from '@/components/analytics/analytics-context-sync';
 import { BrandLoader } from '@/components/layout/brand-loader';
 import { CartHydrator } from '@/components/commerce/cart-hydrator';
+import { ShopifyCartHydrator } from '@/components/commerce/shopify-cart-hydrator';
 import { MotionProvider } from '@/components/motion';
 import { OverlayRoot } from '@/components/layout/overlay-root';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
-import { commerce } from '@/lib/commerce';
+import { commerce, IS_DEMO_MODE } from '@/lib/commerce';
+import { IsDemoModeProvider } from '@/lib/commerce/is-demo-mode';
 import { GrainOverlay } from '@/components/visual/grain-overlay';
 import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
 import { HREFLANG, LOCALES } from '@/lib/i18n/config';
@@ -115,41 +117,44 @@ export default async function RootLayout({
           {t.nav.skipToContent}
         </a>
 
-        <LocaleProvider locale={typedLocale} dictionary={clientDictionary}>
-          {/* LazyMotion shell. `children` is server-rendered content passing
-              through a client boundary — it costs no client JS of its own. */}
-          <MotionProvider>
-            {/*
-              #app-root is what Overlay marks `inert` while a dialog is open, so
-              assistive tech cannot wander out of the modal into the page behind
-              it. The overlays themselves portal OUTSIDE this element.
-            */}
-            <div id="app-root">
-              <SiteHeader nav={t.nav} />
-              {children}
-              <SiteFooter locale={typedLocale} copy={t.footer} />
-            </div>
+        <IsDemoModeProvider value={IS_DEMO_MODE}>
+          <LocaleProvider locale={typedLocale} dictionary={clientDictionary}>
+            {/* LazyMotion shell. `children` is server-rendered content passing
+                through a client boundary — it costs no client JS of its own. */}
+            <MotionProvider>
+              {/*
+                #app-root is what Overlay marks `inert` while a dialog is open, so
+                assistive tech cannot wander out of the modal into the page behind
+                it. The overlays themselves portal OUTSIDE this element.
+              */}
+              <div id="app-root">
+                <SiteHeader nav={t.nav} />
+                {children}
+                <SiteFooter locale={typedLocale} copy={t.footer} />
+              </div>
 
-            <OverlayRoot
-              products={catalogue.nodes}
-              collections={collections}
-              nav={{ shop: t.nav.shop, story: t.nav.story, close: t.nav.close, menu: t.nav.menu }}
-            />
-          </MotionProvider>
-        </LocaleProvider>
+              <OverlayRoot
+                products={catalogue.nodes}
+                collections={collections}
+                nav={{ shop: t.nav.shop, story: t.nav.story, close: t.nav.close, menu: t.nav.menu }}
+              />
+            </MotionProvider>
+          </LocaleProvider>
 
-        {/* The page's single grain layer — see lib/utils/noise-tile.ts. */}
-        <GrainOverlay />
+          {/* The page's single grain layer — see lib/utils/noise-tile.ts. */}
+          <GrainOverlay />
 
-        {/*
-          An overlay that animates OUT, never a gate. The hero above is already
-          painted underneath it from the first frame, so it cannot delay LCP.
-        */}
-        <BrandLoader />
+          {/*
+            An overlay that animates OUT, never a gate. The hero above is already
+            painted underneath it from the first frame, so it cannot delay LCP.
+          */}
+          <BrandLoader />
 
-        {/* Both render nothing. */}
-        <CartHydrator />
-        <AnalyticsContextSync locale={typedLocale} />
+          {/* Both render nothing. IS_DEMO_MODE is safe to read directly here —
+              this file is a Server Component. */}
+          {IS_DEMO_MODE ? <CartHydrator /> : <ShopifyCartHydrator />}
+          <AnalyticsContextSync locale={typedLocale} />
+        </IsDemoModeProvider>
       </body>
     </html>
   );

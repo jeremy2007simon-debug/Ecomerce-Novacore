@@ -6,7 +6,9 @@ import { useEffect, useState } from 'react';
 import { AtlanticLockup } from '@/components/visual/atlantic-mark';
 import { IconBag, IconMenu, IconSearch } from '@/components/visual/icons';
 import { LocaleSwitcher } from './locale-switcher';
+import { useIsDemoMode } from '@/lib/commerce/is-demo-mode';
 import { useCartCount, useCartHydrated } from '@/lib/store/cart-store';
+import { useShopifyCartCount, useShopifyCartHydrated } from '@/lib/store/shopify-cart-store';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { cn } from '@/lib/utils/cn';
@@ -27,9 +29,14 @@ export function SiteHeader({
   nav: { shop: string; story: string; search: string; bag: string; menu: string };
 }) {
   const { locale } = useLocale();
+  const isDemoMode = useIsDemoMode();
   const open = useUIStore((state) => state.open);
-  const count = useCartCount();
-  const hydrated = useCartHydrated();
+  const demoCount = useCartCount();
+  const demoHydrated = useCartHydrated();
+  const shopifyCount = useShopifyCartCount();
+  const shopifyHydrated = useShopifyCartHydrated();
+  const count = isDemoMode ? demoCount : shopifyCount;
+  const hydrated = isDemoMode ? demoHydrated : shopifyHydrated;
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {

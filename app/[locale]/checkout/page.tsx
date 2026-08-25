@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import { CheckoutFlow } from '@/components/commerce/checkout/checkout-flow';
+import { IS_DEMO_MODE } from '@/lib/commerce';
 import { getClientDictionary } from '@/lib/i18n/get-dictionary';
+import { routes } from '@/lib/utils/routes';
 import { isLocale } from '@/types/i18n';
 
 /**
@@ -38,6 +40,16 @@ export default async function CheckoutPage({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+
+  // In Shopify mode, checkout happens on Shopify's own hosted page — the cart
+  // drawer's "Proceed to checkout" already sends the browser straight to the
+  // cart's real checkoutUrl and never links here. Arriving at this route
+  // directly (a stale bookmark, a typed URL) means there is no server-known
+  // cart to resume — this is a Server Component, so the Shopify cart id
+  // (client-side Zustand state) is not available to fetch one. Send the
+  // visitor back to shop rather than rendering the demo flow, which must
+  // never run against a real Shopify cart.
+  if (!IS_DEMO_MODE) redirect(routes.collection(locale));
 
   // The checkout copy lives in the client slice (the flow is a client
   // island); reading it here avoids duplicating the string on the server side.
