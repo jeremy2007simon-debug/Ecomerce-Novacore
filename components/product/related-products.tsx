@@ -1,21 +1,20 @@
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
 import { ProductCard } from '@/components/commerce/product-card';
 import { Eyebrow } from '@/components/ui/eyebrow';
-import { strategyLabel } from '@/lib/commerce/recommendations';
 import type { ScoredProduct } from '@/lib/commerce';
 import type { Locale } from '@/types/i18n';
 
 /**
  * YOU MAY ALSO LIKE.
  *
- * The recommendations arrive with the reasons they were selected, and those
- * reasons are SHOWN — "MATCHED ON: COMPLEMENTARY · SAME COLLECTION".
- *
- * That is a deliberate demo decision. A business owner evaluating NovaCore
- * cannot see an algorithm working; a small mono label under each card makes the
- * personalisation legible in a way that no amount of "powered by AI" copy does.
- * When the demo engine is swapped for a real one, the labels keep working
- * because `reasons` is part of the repository contract, not of this component.
+ * The recommendations arrive with the reasons they were selected —
+ * `entry.reasons`, scored by `lib/commerce/recommendations.ts` — but this is a
+ * storefront, not an admin view: a shopper does not need to be told "MATCHED
+ * ON: COMPLEMENTARY · SAME COLLECTION" under a product card to understand it's
+ * a recommendation. The classification stays fully computed and available on
+ * `ScoredProduct.reasons` for wherever it's actually useful — an internal
+ * NovaCore Commerce dashboard, for instance — this component just no longer
+ * prints it to the public page.
  */
 export function RelatedProducts({
   recommendations,
@@ -24,7 +23,7 @@ export function RelatedProducts({
 }: {
   recommendations: ScoredProduct[];
   locale: Locale;
-  copy: { relatedTitle: string; relatedSubtitle: string; matchedOn: string };
+  copy: { relatedTitle: string; relatedSubtitle: string };
 }) {
   if (recommendations.length === 0) return null;
 
@@ -50,22 +49,11 @@ export function RelatedProducts({
       </Reveal>
 
       <RevealGroup className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-4">
-        {recommendations.map((entry, i) => {
-          const labels = entry.reasons
-            .map((reason) => strategyLabel(reason, locale))
-            .filter((label): label is string => Boolean(label));
-
-          return (
-            <RevealItem key={entry.product.handle}>
-              <ProductCard product={entry.product} locale={locale} index={i} />
-              {labels.length > 0 ? (
-                <p className="micro-label mt-3 text-ink-subtle">
-                  <span className="text-ember">{copy.matchedOn}:</span> {labels.join(' · ')}
-                </p>
-              ) : null}
-            </RevealItem>
-          );
-        })}
+        {recommendations.map((entry, i) => (
+          <RevealItem key={entry.product.handle}>
+            <ProductCard product={entry.product} locale={locale} index={i} />
+          </RevealItem>
+        ))}
       </RevealGroup>
     </section>
   );

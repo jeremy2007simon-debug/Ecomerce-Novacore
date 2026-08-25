@@ -1,4 +1,5 @@
 import type { Localized } from '@/types/i18n';
+import type { ProductForm } from '@/types/visual';
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
@@ -166,6 +167,35 @@ export const ASSISTANT_INTENTS: AssistantIntent[] = [
     cites: ['atlantic-01', 'tide-01'],
   },
 ];
+
+/**
+ * Overrides for the two sizing intents (`size-general`, `size-height`) on the
+ * three products that have no clothing size at all — `SIZELESS_FORMS` in
+ * `lib/commerce/demo/build-product.ts`.
+ *
+ * The keyword engine matches on the QUESTION, not the page it's asked from —
+ * "what size should I choose?" scores against `size-general` regardless of
+ * which product the shopper is looking at. Without this, asking it on
+ * ATLANTIC BOTTLE returned the answer about the ATLANTIC 01's shoulders and
+ * the TRADE PANT's waist tab, citing two products that were not the one being
+ * asked about. `lib/assistant/engine.ts` swaps in the matching entry here,
+ * keyed by `form` — a branch on the product's structural category, not on its
+ * name or handle.
+ */
+export const SIZELESS_SIZE_OVERRIDE: Partial<Record<ProductForm, Localized<string>>> = {
+  bag: {
+    es: 'CURRENT BAG es de talla única — no usa tallas de ropa. Lo que importa aquí es la capacidad: 4 litros, 210 g, con la correa ajustable de 70 a 140 cm.',
+    en: 'CURRENT BAG is one size — it does not use clothing sizing. What matters here is capacity: 4 litres, 210 g, with the strap adjustable from 70 to 140 cm.',
+  },
+  cap: {
+    es: 'NORTH CAP es de talla única con cierre metálico ajustable en la parte trasera — no hay talla de ropa que elegir.',
+    en: 'NORTH CAP is one size with an adjustable metal closure at the back — there is no clothing size to choose.',
+  },
+  bottle: {
+    es: 'ATLANTIC BOTTLE es de talla única — el concepto de talla no aplica. Tiene 500 ml de capacidad y pesa 295 g vacía.',
+    en: 'ATLANTIC BOTTLE is one size — sizing does not apply. It holds 500 ml and weighs 295 g empty.',
+  },
+};
 
 /** Prompt chips offered before the visitor types anything. */
 export const ASSISTANT_SUGGESTIONS: Localized<string[]> = {

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { ContactForm } from '@/components/layout/contact-form';
 import { DocumentPage, DocumentSection } from '@/components/layout/document-page';
+import { DemoBadge } from '@/components/ui/demo-badge';
 import { getServerDictionary } from '@/lib/i18n/get-dictionary';
 import { isLocale } from '@/types/i18n';
 
@@ -39,6 +40,18 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
 
   return (
     <DocumentPage eyebrow={page.eyebrow} title={page.title} intro={page.intro}>
+      {/*
+        The channel list below — real-looking email addresses, a street
+        address, response-time promises — reads as operational on its own.
+        `page.demo` already exists for the form beneath it; the same line
+        belongs at the top too, not only after someone has scrolled past the
+        addresses.
+      */}
+      <p className="reading flex items-center gap-3 text-small text-ink-subtle">
+        <DemoBadge />
+        {page.demo}
+      </p>
+
       <DocumentSection label={page.channelsLabel}>
         <dl className="flex flex-col">
           {page.channels.map((channel) => (

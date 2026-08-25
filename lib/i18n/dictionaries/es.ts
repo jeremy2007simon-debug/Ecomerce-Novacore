@@ -98,8 +98,6 @@ export const es: Dictionary = {
     product: {
       addToBag: 'Añadir a la bolsa',
       soldOut: 'Agotado',
-      selectSize: 'Elige una talla',
-      selectColor: 'Elige un color',
       sizeGuide: 'Guía de tallas',
       lowStock: 'Quedan {count}',
       inStock: 'En stock',
@@ -119,7 +117,6 @@ export const es: Dictionary = {
       reviews: 'Opiniones',
       relatedTitle: 'También te puede interesar',
       relatedSubtitle: 'Seleccionado para ti',
-      matchedOn: 'Coincide en',
       notFoundTitle: 'Esta pieza ya no existe',
       notFoundBody: 'Puede que se haya retirado o que el enlace sea incorrecto.',
       notFoundCta: 'Ver la colección',
@@ -164,6 +161,7 @@ export const es: Dictionary = {
         title: 'Envíos',
         intro:
           'Las mismas condiciones que aparecen en cada ficha de producto, completas. Las tarifas son por pedido, no por artículo, y no se añade nada al finalizar la compra.',
+        demo: 'Tienda de demostración: estas tarifas y plazos son ilustrativos, no datos reales de transportista.',
         tableLabel: 'Tarifas',
         columns: ['Destino', 'Método', 'Plazo', 'Coste'],
         rows: [
@@ -184,6 +182,7 @@ export const es: Dictionary = {
         title: 'Devoluciones',
         intro:
           'Treinta días desde la entrega, por el motivo que sea. La recogida es gratuita y se hace en tu puerta: no hace falta buscar ningún punto de entrega.',
+        demo: 'Tienda de demostración: no se concierta ninguna recogida real ni se emite ningún reembolso.',
         stepsLabel: 'Cómo funciona',
         steps: [
           { title: 'Avísanos', body: 'Responde al correo de confirmación indicando la pieza y si prefieres cambio o reembolso.' },
@@ -221,6 +220,15 @@ export const es: Dictionary = {
           'Manga: desde el centro del cuello por la espalda hasta el puño.',
         ],
         note: 'Los accesorios y los objetos son de talla única. Si te importa una medida que no está aquí, pregúntanos: las tenemos todas.',
+        estimator: {
+          title: '¿No estás seguro? Estímalo',
+          body: 'Un punto de partida aproximado a partir de tu altura y peso: no es un algoritmo de ajuste real.',
+          height: 'Altura (cm)',
+          weight: 'Peso (kg)',
+          cta: 'Estimar',
+          result: 'Talla recomendada: {size}',
+          demo: 'Estimación de demostración: una heurística simplificada, no un modelo de ajuste real.',
+        },
       },
       contact: {
         eyebrow: 'Ayuda',
@@ -451,7 +459,10 @@ export const es: Dictionary = {
       placeholder: 'Pregunta sobre tallaje, tejido o clima…',
       send: 'Enviar',
       close: 'Cerrar',
-      demoNote: 'DEMOSTRACIÓN — las respuestas vienen de un motor local con guion. No se llama a ningún modelo de IA.',
+      tagline: 'Asistente de compra con IA',
+      moreInfoLabel: 'Cómo funciona',
+      moreInfoBody:
+        'Entorno de demostración. La versión de producción puede conectarse al catálogo real de la tienda y a un proveedor de IA.',
       thinking: 'Pensando',
       suggestionsTitle: 'Prueba a preguntar',
       fallback:

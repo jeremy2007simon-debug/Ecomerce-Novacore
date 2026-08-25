@@ -205,7 +205,7 @@ export default async function ProductPage({
 
           {/* The primary CTA. StickyBuyBar watches this id. */}
           <div id="buy" className="mt-12">
-            <PurchasePanel product={product} locale={locale} />
+            <PurchasePanel product={product} locale={locale} sizeGuideCopy={t.pages.sizeGuide} />
           </div>
         </div>
       </section>
@@ -264,7 +264,18 @@ export default async function ProductPage({
       */}
       <section id="reviews" className="editorial border-t border-hairline py-(--spacing-section)">
         <Rule label={t.product.reviews} className="mb-14" />
-        <ReviewSummaryPanel summary={reviews.summary} locale={locale} copy={t.reviews} />
+        {/*
+          The fit meter only makes sense where "size" is a concept — derived
+          from whether this product exposes a size option at all, which is
+          already the exact line the rest of the page draws between apparel
+          and accessories. See ReviewSummaryPanel for why.
+        */}
+        <ReviewSummaryPanel
+          summary={reviews.summary}
+          locale={locale}
+          copy={t.reviews}
+          showFit={product.options.some((option) => option.name === 'size')}
+        />
         <div className="mt-20">
           <ReviewList reviews={reviews.nodes} copy={t.reviews} />
         </div>

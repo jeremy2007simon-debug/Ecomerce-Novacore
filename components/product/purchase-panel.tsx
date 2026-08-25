@@ -1,15 +1,14 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { AddToBag } from '@/components/commerce/add-to-bag';
 import { ProductVisual } from '@/components/visual/product-visual';
 import { IconTruck } from '@/components/visual/icons';
+import { SizeGuideDrawer, type SizeGuideCopy } from '@/components/product/size-guide-drawer';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { usePDPStore } from '@/lib/store/pdp-store';
 import { cn } from '@/lib/utils/cn';
 import { formatMoney } from '@/lib/utils/money';
-import { routes } from '@/lib/utils/routes';
 import type { Product, Variant } from '@/types/commerce';
 import type { VisualTint } from '@/types/visual';
 
@@ -32,11 +31,14 @@ export function PurchasePanel({
   locale,
   showVisual = false,
   className,
+  sizeGuideCopy,
 }: {
   product: Product;
   locale: 'es' | 'en';
   showVisual?: boolean;
   className?: string;
+  /** The `pages.sizeGuide` server-dictionary block, threaded down for the drawer. */
+  sizeGuideCopy: SizeGuideCopy;
 }) {
   const { t, fmt } = useLocale();
 
@@ -47,6 +49,7 @@ export function PurchasePanel({
     () => colorOption?.values.find((value) => value.available)?.value ?? '',
   );
   const [size, setSize] = useState<string | null>(null);
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
 
   const variant: Variant | undefined = useMemo(() => {
     return product.variants.find((candidate) => {
@@ -183,19 +186,22 @@ export function PurchasePanel({
           <legend className="label mb-4 flex w-full items-baseline justify-between text-ink-subtle">
             <span>{sizeOption.label}</span>
             {/*
-              A real destination, and a distinct label.
+              A real action, and a distinct label.
 
-              This was a `<button>` with no `onClick` — nothing happened when
-              you pressed it — carrying `t.product.size`, the SAME string as
-              the legend beside it, so the picker read "TALLA  TALLA". It now
-              says "Guía de tallas" and goes to the size guide, which exists.
+              This was first a `<button>` with no `onClick` at all — carrying
+              `t.product.size`, the SAME string as the legend beside it, so
+              the picker read "TALLA  TALLA" — then a `<Link>` to the
+              standalone size-guide page, which worked but took the shopper
+              off the product they were buying. Now it opens the measurements
+              in place, over this page, in a drawer.
             */}
-            <Link
-              href={routes.sizeGuide(locale)}
+            <button
+              type="button"
+              onClick={() => setSizeGuideOpen(true)}
               className="text-ink underline decoration-hairline-strong underline-offset-4 transition-colors duration-(--duration-fast) hover:decoration-ember"
             >
               {t.product.sizeGuide}
-            </Link>
+            </button>
           </legend>
 
           {/*
@@ -227,6 +233,17 @@ export function PurchasePanel({
               </button>
             ))}
           </div>
+
+          {/*
+            Only mounted where a size exists in the first place — there is no
+            path to it on a sizeless product, since the "Size guide" trigger
+            above lives inside this same `sizeOption` block.
+          */}
+          <SizeGuideDrawer
+            open={sizeGuideOpen}
+            onClose={() => setSizeGuideOpen(false)}
+            copy={sizeGuideCopy}
+          />
         </fieldset>
       ) : null}
 
@@ -237,15 +254,20 @@ export function PurchasePanel({
         </p>
       ) : null}
 
+      {/*
+        No caption duplicating the button's own label below it.
+
+        `AddToBag` already renders `disabledLabel` — "Select a size" — AS the
+        button's text whenever `cartInput` is null, which it is for the whole
+        time `needsSize` is true. A second paragraph directly underneath used
+        to repeat the identical string, so the prompt appeared twice at once.
+        The button already says it; nothing else needs to.
+      */}
       <AddToBag
         input={cartInput}
         disabled={soldOut}
         disabledLabel={soldOut ? t.product.soldOut : t.product.selectSizeFirst}
       />
-
-      {needsSize && !soldOut ? (
-        <p className="micro-label mt-3 text-center text-ink-subtle">{t.product.selectSizeFirst}</p>
-      ) : null}
 
       <p className="micro-label mt-6 flex items-center justify-center gap-2 text-ink-subtle">
         <IconTruck className="size-4" />

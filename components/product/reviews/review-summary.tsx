@@ -4,18 +4,28 @@ import type { ReviewSummary as Summary } from '@/types/commerce';
 import type { Locale } from '@/types/i18n';
 
 /**
- * Rating summary: headline figure, distribution bars, and a fit meter.
+ * Rating summary: headline figure, distribution bars, and — for apparel only —
+ * a fit meter.
  *
  * The distribution bars use scaleX on a transform, not width, for the same
  * reason as the shipping meter — width animates on the layout thread.
  *
- * The fit meter is included because it is the single most useful piece of
- * information on an apparel review block, and almost every template omits it.
+ * `showFit` gates the "Runs small / True to size / Runs large" column. It
+ * used to render unconditionally, including on CURRENT BAG, NORTH CAP and
+ * ATLANTIC BOTTLE — objects that have no clothing size, where no review ever
+ * carries a `fit` vote, so the meter sat dead-centre claiming "true to size"
+ * for a concept the product doesn't have. The caller derives it from whether
+ * the product exposes a size option at all, which is the same structural
+ * signal the rest of the PDP already uses — no separate category flag needed.
+ * The grid drops from three columns to two when it's hidden, and the
+ * "X% would recommend" line moves to sit under the distribution bars instead
+ * of disappearing with the fit column.
  */
 export function ReviewSummaryPanel({
   summary,
   locale,
   copy,
+  showFit,
 }: {
   summary: Summary;
   locale: Locale;
@@ -27,6 +37,7 @@ export function ReviewSummaryPanel({
     fitTrue: string;
     fitLarge: string;
   };
+  showFit: boolean;
 }) {
   const total = summary.distribution.reduce((sum, n) => sum + n, 0) || 1;
   const fmt = (template: string, vars: Record<string, string | number>) =>
@@ -36,7 +47,12 @@ export function ReviewSummaryPanel({
   const fitPercent = ((summary.fitBias + 1) / 2) * 100;
 
   return (
-    <div className="grid gap-12 lg:grid-cols-[auto_1fr_1fr] lg:gap-16">
+    <div
+      className={cn(
+        'grid gap-12 lg:gap-16',
+        showFit ? 'lg:grid-cols-[auto_1fr_1fr]' : 'lg:grid-cols-[auto_1fr]',
+      )}
+    >
       <div>
         {/*
           `text-headline`, not `text-hero`.
@@ -77,28 +93,36 @@ export function ReviewSummaryPanel({
             </div>
           );
         })}
+
+        {!showFit ? (
+          <p className="micro-label mt-6 text-ember" data-numeric>
+            {fmt(copy.recommend, { percent: summary.recommendPercent })}
+          </p>
+        ) : null}
       </div>
 
-      <div className="flex flex-col justify-center">
-        <p className="label mb-5 text-ink-subtle">{copy.fitTitle}</p>
-        <div className="relative h-px w-full bg-hairline-strong">
-          <span
-            className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-pill bg-ember"
-            style={{ left: `${fitPercent}%` }}
-          />
-        </div>
-        <div className="mt-3 flex justify-between">
-          <span className="micro-label text-ink-subtle">{copy.fitSmall}</span>
-          <span className={cn('micro-label', Math.abs(summary.fitBias) < 0.2 ? 'text-ink' : 'text-ink-subtle')}>
-            {copy.fitTrue}
-          </span>
-          <span className="micro-label text-ink-subtle">{copy.fitLarge}</span>
-        </div>
+      {showFit ? (
+        <div className="flex flex-col justify-center">
+          <p className="label mb-5 text-ink-subtle">{copy.fitTitle}</p>
+          <div className="relative h-px w-full bg-hairline-strong">
+            <span
+              className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-pill bg-ember"
+              style={{ left: `${fitPercent}%` }}
+            />
+          </div>
+          <div className="mt-3 flex justify-between">
+            <span className="micro-label text-ink-subtle">{copy.fitSmall}</span>
+            <span className={cn('micro-label', Math.abs(summary.fitBias) < 0.2 ? 'text-ink' : 'text-ink-subtle')}>
+              {copy.fitTrue}
+            </span>
+            <span className="micro-label text-ink-subtle">{copy.fitLarge}</span>
+          </div>
 
-        <p className="micro-label mt-8 text-ember" data-numeric>
-          {fmt(copy.recommend, { percent: summary.recommendPercent })}
-        </p>
-      </div>
+          <p className="micro-label mt-8 text-ember" data-numeric>
+            {fmt(copy.recommend, { percent: summary.recommendPercent })}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

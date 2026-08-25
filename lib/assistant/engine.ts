@@ -1,5 +1,9 @@
-import { ASSISTANT_INTENTS, ASSISTANT_SUGGESTIONS } from '@/data/assistant';
+import { ASSISTANT_INTENTS, ASSISTANT_SUGGESTIONS, SIZELESS_SIZE_OVERRIDE } from '@/data/assistant';
 import type { Locale } from '@/types/i18n';
+import type { ProductForm } from '@/types/visual';
+
+/** The two intents that assume the product being asked about has a clothing size. */
+const SIZING_INTENTS = new Set(['size-general', 'size-height']);
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
@@ -61,11 +65,25 @@ export function matchIntent(question: string, locale: Locale) {
   return best && best.score >= 2 ? best : null;
 }
 
-export async function answer(question: string, locale: Locale): Promise<AssistantAnswer> {
+export async function answer(
+  question: string,
+  locale: Locale,
+  /** The product this question is being asked from, when asked on a PDP. */
+  product?: { form: ProductForm; handle: string },
+): Promise<AssistantAnswer> {
   const match = matchIntent(question, locale);
 
   if (!match) {
     return { intent: null, text: '', cites: [], matched: false };
+  }
+
+  // A sizing question asked from a product that has no clothing size gets its
+  // own answer instead of the apparel one — see SIZELESS_SIZE_OVERRIDE.
+  if (product && SIZING_INTENTS.has(match.id)) {
+    const override = SIZELESS_SIZE_OVERRIDE[product.form];
+    if (override) {
+      return { intent: match.id, text: override[locale], cites: [product.handle], matched: true };
+    }
   }
 
   const intent = ASSISTANT_INTENTS.find((candidate) => candidate.id === match.id);
