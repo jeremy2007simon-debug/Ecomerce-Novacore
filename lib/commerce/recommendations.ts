@@ -105,7 +105,13 @@ export const trendingStrategy: RecommendationStrategy = {
   label: { es: 'EN TENDENCIA', en: 'TRENDING' },
   weight: 0.12,
   score: (candidate) => {
-    const score = Math.min(1, candidate.rating.count / 220) * (candidate.rating.value / 5);
+    // Normalised against the highest review count in the catalogue (46, on
+    // VOLCANIC TEE) with the same ~3% headroom the old divisor (220 against a
+    // then-highest 213) used. When the demo review counts were turned down to
+    // a credible size, this divisor had to come down with them — left at 220
+    // every product would have scored under 0.2 and "trending" could never
+    // fire for anyone.
+    const score = Math.min(1, candidate.rating.count / 48) * (candidate.rating.value / 5);
     return { score, reason: score > 0.75 ? 'trending' : undefined };
   },
 };

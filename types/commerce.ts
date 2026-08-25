@@ -1,4 +1,4 @@
-import type { ProductMedia } from './visual';
+import type { ProductForm, ProductMedia } from './visual';
 
 export type CurrencyCode = 'EUR' | 'USD' | 'GBP';
 
@@ -88,6 +88,16 @@ export interface Product {
   vendor: string;
   tags: string[];
   collectionHandles: string[];
+  /**
+   * What kind of thing this is — 'shell' | 'overshirt' | 'tee' | 'knit' |
+   * 'pant' | 'bag' | 'cap' | 'bottle'. This is the one field UI reaches for to
+   * decide which modules apply (a fit meter makes no sense on a bottle; a
+   * clothing-size prompt makes no sense on a cap), instead of branching on
+   * product name or handle at every call site. It is also exactly the shape
+   * Shopify exposes as productType, so nothing here needs to change shape when
+   * this demo repository is swapped for a real Storefront API adapter.
+   */
+  form: ProductForm;
   availableForSale: boolean;
   priceRange: { min: Money; max: Money };
   options: ProductOption[];

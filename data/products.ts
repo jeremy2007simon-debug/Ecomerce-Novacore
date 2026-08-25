@@ -113,9 +113,97 @@ const CARE_COTTON: Localized<string[]> = {
   ],
 };
 
-const CARE_HARDWARE: Localized<string[]> = {
-  es: ['Limpiar con paño húmedo', 'No apto para lavavajillas', 'Secar completamente antes de guardar'],
-  en: ['Wipe with a damp cloth', 'Not dishwasher safe', 'Dry fully before storing'],
+/**
+ * TIDE 01's own fabric — cotton–nylon twill, no membrane and no DWR finish.
+ * `CARE_TECHNICAL` above was written for the ePTFE shell and talks about
+ * reactivating a DWR finish the overshirt does not have; this is what an
+ * unlined twill actually needs.
+ */
+const CARE_COTTON_TWILL: Localized<string[]> = {
+  es: [
+    'Lavar a máquina a 30 °C con colores similares',
+    'No usar lejía',
+    'Secar en tendedero, no en secadora',
+    'Planchar a temperatura media si es necesario',
+  ],
+  en: [
+    'Machine wash at 30 °C with similar colours',
+    'Do not bleach',
+    'Line dry, do not tumble dry',
+    'Iron on medium heat if needed',
+  ],
+};
+
+/**
+ * TRADE PANT's four-way stretch nylon–elastane twill. High heat and fabric
+ * softener both degrade elastane over time, which is the failure mode this
+ * fabric actually has — not a membrane to protect.
+ */
+const CARE_STRETCH: Localized<string[]> = {
+  es: [
+    'Lavar a máquina a 30 °C del revés',
+    'No usar lejía ni suavizante: el suavizante degrada el elastano',
+    'Secar al aire, nunca en secadora a alta temperatura',
+    'No planchar directamente sobre la cinturilla elástica',
+  ],
+  en: [
+    'Machine wash at 30 °C inside out',
+    'No bleach or fabric softener — softener degrades the elastane',
+    'Air dry, never high-heat tumble dry',
+    'Do not iron directly over the elastic waistband',
+  ],
+};
+
+/**
+ * NORTH CAP: recycled ripstop with a DWR finish, six structured panels — a
+ * machine wash or a dishwasher (`CARE_HARDWARE`'s old line) would deform the
+ * brim. This is what a structured technical cap actually needs.
+ */
+const CARE_CAP: Localized<string[]> = {
+  es: [
+    'Lavar a mano con agua fría',
+    'No lavar a máquina: deforma la visera',
+    'Secar al aire sobre su forma, nunca en secadora',
+    'Reactivar el DWR con plancha tibia sin vapor si el agua deja de perlar',
+  ],
+  en: [
+    'Hand wash in cold water',
+    'Do not machine wash — it distorts the brim',
+    'Air dry on its shape, never tumble dry',
+    'Reactivate the DWR with a warm iron, no steam, if water stops beading',
+  ],
+};
+
+/** CURRENT BAG: recycled Cordura® with a TPU laminate and an anodised buckle. */
+const CARE_BAG: Localized<string[]> = {
+  es: [
+    'Limpiar con un paño húmedo',
+    'No lavar a máquina',
+    'Secar completamente antes de guardar',
+    'La hebilla de aluminio anodizado no necesita mantenimiento',
+  ],
+  en: [
+    'Wipe clean with a damp cloth',
+    'Do not machine wash',
+    'Dry fully before storing',
+    'The anodised aluminium buckle needs no maintenance',
+  ],
+};
+
+/** ATLANTIC BOTTLE: double-walled steel with a replaceable lid gasket. */
+const CARE_BOTTLE: Localized<string[]> = {
+  es: [
+    'Enjuagar el interior después de cada uso',
+    'Lavar a mano; no apto para lavavajillas',
+    'Secar con el tapón abierto para evitar olores',
+    'Revisar la junta de la tapa periódicamente: hay repuesto disponible',
+  ],
+  en: [
+    'Rinse the interior after every use',
+    'Hand wash; not dishwasher safe',
+    'Dry with the lid off to avoid odours',
+    'Check the lid gasket periodically — a spare is available',
+  ],
 };
 
 const APPAREL_SIZES: DemoSize[] = [
@@ -196,7 +284,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     pairsWith: ['tide-01', 'north-cap', 'atlantic-bottle'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.9, count: 127, distribution: [1, 1, 3, 12, 110] },
+    rating: { value: 4.9, count: 28, distribution: [0, 0, 1, 3, 24] },
     featuredRank: 1,
     seo: {
       es: {
@@ -238,7 +326,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     composition: { es: '62 % algodón orgánico, 38 % nylon reciclado', en: '62% organic cotton, 38% recycled nylon' },
     weightGrams: 480,
     origin: { es: 'Tejido en España · Confeccionado en Portugal', en: 'Woven in Spain · Made in Portugal' },
-    care: CARE_TECHNICAL,
+    care: CARE_COTTON_TWILL,
     features: {
       es: [
         { key: 'layer', label: 'CAPA INTERMEDIA', detail: 'Cabe bajo la ATLANTIC 01 sin abultar en el hombro.' },
@@ -268,7 +356,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     pairsWith: ['atlantic-01', 'volcanic-tee', 'trade-pant'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.8, count: 94, distribution: [1, 2, 4, 14, 73] },
+    rating: { value: 4.8, count: 21, distribution: [0, 0, 1, 3, 17] },
     featuredRank: 2,
     seo: {
       es: { title: 'TIDE 01 — Sobrecamisa técnica', description: 'Sobrecamisa de sarga algodón-nylon. La capa intermedia para días de diez grados de diferencia.' },
@@ -335,7 +423,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     pairsWith: ['tide-01', 'trade-pant', 'north-cap'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.7, count: 213, distribution: [3, 5, 12, 38, 155] },
+    rating: { value: 4.7, count: 46, distribution: [0, 1, 2, 8, 35] },
     featuredRank: 3,
     seo: {
       es: { title: 'VOLCANIC TEE — Camiseta de gramaje alto', description: 'Algodón orgánico de 240 g/m² teñido con pigmento mineral volcánico.' },
@@ -402,7 +490,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     pairsWith: ['atlantic-01', 'trade-pant', 'current-bag'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.9, count: 78, distribution: [0, 1, 2, 7, 68] },
+    rating: { value: 4.9, count: 17, distribution: [0, 0, 0, 2, 15] },
     featuredRank: 4,
     seo: {
       es: { title: 'BASALT KNIT — Jersey de merino', description: 'Merino extrafino de 19,5 micras, punto de 14 galgas. Hilo italiano, tejido en Portugal.' },
@@ -444,7 +532,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     composition: { es: '94 % nylon reciclado, 6 % elastano', en: '94% recycled nylon, 6% elastane' },
     weightGrams: 410,
     origin: { es: 'Tejido en Italia · Confeccionado en Portugal', en: 'Woven in Italy · Made in Portugal' },
-    care: CARE_TECHNICAL,
+    care: CARE_STRETCH,
     features: {
       es: [
         { key: 'stretch', label: 'ELÁSTICO 4D', detail: 'Recuperación total: no hace rodilla después de un día sentado.' },
@@ -474,7 +562,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     pairsWith: ['volcanic-tee', 'basalt-knit', 'atlantic-01'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.6, count: 61, distribution: [1, 3, 5, 12, 40] },
+    rating: { value: 4.6, count: 14, distribution: [0, 0, 1, 4, 9] },
     featuredRank: 6,
     seo: {
       es: { title: 'TRADE PANT — Pantalón técnico', description: 'Sarga elástica de cuatro direcciones, cintura ajustable, secado rápido.' },
@@ -510,7 +598,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     composition: { es: '100 % nylon Cordura® reciclado con laminado TPU', en: '100% recycled Cordura® nylon with TPU laminate' },
     weightGrams: 210,
     origin: { es: 'Confeccionado en Portugal', en: 'Made in Portugal' },
-    care: CARE_HARDWARE,
+    care: CARE_BAG,
     features: {
       es: [
         { key: 'volume', label: '4 LITROS', detail: 'Dimensionada para lo esencial, no para lo posible.' },
@@ -540,7 +628,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     pairsWith: ['atlantic-bottle', 'north-cap', 'basalt-knit'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.8, count: 156, distribution: [2, 3, 7, 24, 120] },
+    rating: { value: 4.8, count: 34, distribution: [0, 0, 1, 5, 28] },
     featuredRank: 5,
     seo: {
       es: { title: 'CURRENT BAG — Bandolera mínima', description: 'Bandolera de 4 litros en Cordura® reciclado con correa intercambiable.' },
@@ -576,7 +664,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     composition: { es: '100 % poliéster reciclado con acabado DWR', en: '100% recycled polyester with DWR finish' },
     weightGrams: 68,
     origin: { es: 'Confeccionado en Portugal', en: 'Made in Portugal' },
-    care: CARE_HARDWARE,
+    care: CARE_CAP,
     features: {
       es: [
         { key: 'packable', label: 'PLEGABLE', detail: 'Recupera la forma después de doblarse en un bolsillo.' },
@@ -595,18 +683,22 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
         { label: 'Paneles', value: '6' },
         { label: 'Visera', value: '7 cm, preformada' },
         { label: 'Cierre', value: 'Metálico' },
+        { label: 'Ajuste', value: 'Continuo, banda trasera' },
+        { label: 'Contorno de cabeza', value: '54–60 cm (talla única ajustable)' },
       ],
       en: [
         { label: 'Weight', value: '68 g' },
         { label: 'Panels', value: '6' },
         { label: 'Brim', value: '7 cm, pre-curved' },
         { label: 'Closure', value: 'Metal' },
+        { label: 'Fit', value: 'Continuous, rear band' },
+        { label: 'Head circumference', value: '54–60 cm (adjustable one size)' },
       ],
     },
     pairsWith: ['atlantic-01', 'current-bag', 'volcanic-tee'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.7, count: 89, distribution: [1, 2, 6, 18, 62] },
+    rating: { value: 4.7, count: 19, distribution: [0, 0, 1, 4, 14] },
     featuredRank: 7,
     seo: {
       es: { title: 'NORTH CAP — Gorra técnica', description: 'Gorra plegable de seis paneles en ripstop reciclado con acabado DWR.' },
@@ -642,7 +734,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     composition: { es: 'Acero inoxidable 18/8 de doble pared, sin BPA', en: 'Double-walled 18/8 stainless steel, BPA-free' },
     weightGrams: 295,
     origin: { es: 'Fabricada en Portugal', en: 'Made in Portugal' },
-    care: CARE_HARDWARE,
+    care: CARE_BOTTLE,
     features: {
       es: [
         { key: 'thermal', label: '24 H FRÍO', detail: 'Doce horas caliente. Vacío entre paredes, no espuma.' },
@@ -661,18 +753,20 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
         { label: 'Peso', value: '295 g' },
         { label: 'Altura', value: '24 cm' },
         { label: 'Boca', value: '52 mm' },
+        { label: 'Aislamiento', value: '24 h frío / 12 h caliente' },
       ],
       en: [
         { label: 'Capacity', value: '500 ml' },
         { label: 'Weight', value: '295 g' },
         { label: 'Height', value: '24 cm' },
         { label: 'Mouth', value: '52 mm' },
+        { label: 'Insulation', value: '24h cold / 12h hot' },
       ],
     },
     pairsWith: ['current-bag', 'north-cap', 'atlantic-01'],
     shipping: SHIPPING,
     returns: RETURNS,
-    rating: { value: 4.9, count: 204, distribution: [1, 2, 6, 26, 169] },
+    rating: { value: 4.9, count: 41, distribution: [0, 0, 1, 4, 36] },
     featuredRank: 8,
     seo: {
       es: { title: 'ATLANTIC BOTTLE — Botella isotérmica', description: 'Botella de 500 ml en acero 18/8 de doble pared. 24 h frío, 12 h caliente.' },

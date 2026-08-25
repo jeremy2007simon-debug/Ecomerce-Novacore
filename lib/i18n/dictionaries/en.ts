@@ -100,8 +100,6 @@ export const en = {
     product: {
       addToBag: 'Add to bag',
       soldOut: 'Sold out',
-      selectSize: 'Select a size',
-      selectColor: 'Select a colour',
       sizeGuide: 'Size guide',
       lowStock: 'Only {count} left',
       inStock: 'In stock',
@@ -121,7 +119,6 @@ export const en = {
       reviews: 'Reviews',
       relatedTitle: 'You may also like',
       relatedSubtitle: 'Selected for you',
-      matchedOn: 'Matched on',
       notFoundTitle: 'This piece no longer exists',
       notFoundBody: 'It may have been retired, or the link may be wrong.',
       notFoundCta: 'View the collection',
@@ -166,6 +163,7 @@ export const en = {
         title: 'Shipping',
         intro:
           'The same terms shown on every product page, in full. Rates are per order, not per item, and nothing is added at checkout.',
+        demo: 'Demo store — these rates and timelines are illustrative, not live carrier data.',
         tableLabel: 'Rates',
         columns: ['Destination', 'Method', 'Time', 'Cost'],
         rows: [
@@ -186,6 +184,7 @@ export const en = {
         title: 'Returns',
         intro:
           'Thirty days from delivery, for any reason. Collection is free and arranged from your door — you do not need to find a drop-off point.',
+        demo: 'Demo store — no real collection is booked and no refund is issued.',
         stepsLabel: 'How it works',
         steps: [
           { title: 'Tell us', body: 'Reply to your order confirmation with the item and whether you want an exchange or a refund.' },
@@ -223,6 +222,15 @@ export const en = {
           'Sleeve — from the centre back of the collar to the cuff.',
         ],
         note: 'Accessories and hardware are one size. If a measurement matters to you and is not here, ask — we have all of them.',
+        estimator: {
+          title: 'Not sure? Estimate it',
+          body: 'A rough starting point from height and weight — not a real fit algorithm.',
+          height: 'Height (cm)',
+          weight: 'Weight (kg)',
+          cta: 'Estimate',
+          result: 'Recommended size: {size}',
+          demo: 'Demo estimate — a simplified heuristic, not a real fit model.',
+        },
       },
       contact: {
         eyebrow: 'Help',
@@ -453,7 +461,10 @@ export const en = {
       placeholder: 'Ask about fit, fabric or weather…',
       send: 'Send',
       close: 'Close',
-      demoNote: 'DEMO — answers come from a local scripted engine. No AI model is called.',
+      tagline: 'AI shopping assistant',
+      moreInfoLabel: 'How this works',
+      moreInfoBody:
+        'Demonstration environment. Production version can connect to the live store catalogue and an AI provider.',
       thinking: 'Thinking',
       suggestionsTitle: 'Try asking',
       fallback:

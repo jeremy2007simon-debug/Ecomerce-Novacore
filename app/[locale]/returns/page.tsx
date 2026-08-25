@@ -7,6 +7,7 @@ import {
   DocumentPage,
   DocumentSection,
 } from '@/components/layout/document-page';
+import { DemoBadge } from '@/components/ui/demo-badge';
 import { getServerDictionary } from '@/lib/i18n/get-dictionary';
 import { isLocale } from '@/types/i18n';
 
@@ -38,6 +39,12 @@ export default async function ReturnsPage({ params }: { params: Promise<{ locale
 
   return (
     <DocumentPage eyebrow={page.eyebrow} title={page.title} intro={page.intro}>
+      {/* Same demo disclosure as Shipping: concrete SLAs deserve a plain say-so. */}
+      <p className="reading flex items-center gap-3 text-small text-ink-subtle">
+        <DemoBadge />
+        {page.demo}
+      </p>
+
       <DocumentSection label={page.stepsLabel}>
         <DocumentList items={page.steps} numbered />
       </DocumentSection>

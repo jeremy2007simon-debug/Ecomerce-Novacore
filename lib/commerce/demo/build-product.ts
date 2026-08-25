@@ -180,6 +180,7 @@ export function buildProduct(source: DemoProduct, locale: Locale): Product {
     vendor: source.vendor,
     tags: source.tags,
     collectionHandles: source.collectionHandles,
+    form: source.form,
     availableForSale: variants.some((v) => v.availableForSale),
     priceRange: { min: price, max: price },
     options: buildOptions(source, locale),

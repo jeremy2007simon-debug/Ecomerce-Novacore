@@ -7,6 +7,7 @@ import {
   DocumentSection,
   DocumentTable,
 } from '@/components/layout/document-page';
+import { DemoBadge } from '@/components/ui/demo-badge';
 import { getServerDictionary } from '@/lib/i18n/get-dictionary';
 import { isLocale } from '@/types/i18n';
 
@@ -44,6 +45,19 @@ export default async function ShippingPage({ params }: { params: Promise<{ local
 
   return (
     <DocumentPage eyebrow={page.eyebrow} title={page.title} intro={page.intro}>
+      {/*
+        Shipping quotes concrete SLAs and a cutoff time — the most
+        operational-sounding page on the site — so it gets the same demo
+        disclosure Terms, Privacy and Checkout already carry. No magic
+        spacing here: it is simply the first item in `DocumentPage`'s own
+        gapped column, so the existing `--spacing-section` gap separates it
+        from the table below like any other section.
+      */}
+      <p className="reading flex items-center gap-3 text-small text-ink-subtle">
+        <DemoBadge />
+        {page.demo}
+      </p>
+
       <DocumentSection label={page.tableLabel}>
         <DocumentTable
           caption={page.tableLabel}

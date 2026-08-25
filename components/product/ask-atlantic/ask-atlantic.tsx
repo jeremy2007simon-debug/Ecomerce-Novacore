@@ -60,7 +60,7 @@ export function AskAtlantic({
     setPending(true);
     setQuestion('');
 
-    const response = await answer(trimmed, locale);
+    const response = await answer(trimmed, locale, { form: product.form, handle: product.handle });
 
     track({
       name: 'ai_assistant_query',
@@ -88,8 +88,30 @@ export function AskAtlantic({
           <h2 id="ask-atlantic-heading" className="text-headline mt-6 font-medium text-ink">
             {t.assistant.subtitle}
           </h2>
-          <p className="reading mt-5 text-small text-ink-muted">{t.assistant.demoNote}</p>
-          <DemoBadge tone="accent" className="mt-5" />
+          <p className="reading mt-5 flex items-center gap-2.5 text-small text-ink-muted">
+            {t.assistant.tagline}
+            <DemoBadge tone="accent" />
+          </p>
+          {/*
+            The full disclosure — that this is a keyword engine, not a model —
+            used to sit always-visible as a paragraph of its own, then repeated
+            again at the bottom of the thread. A native `<details>` (same
+            pattern as DetailsAccordion elsewhere: zero extra JS) keeps it one
+            click away instead of three lines of technical copy a shopper has
+            to read past before they can ask anything.
+          */}
+          <details className="group mt-5">
+            <summary className="label inline-flex cursor-pointer list-none items-center gap-2 text-ink-subtle [&::-webkit-details-marker]:hidden">
+              {t.assistant.moreInfoLabel}
+              <span
+                aria-hidden="true"
+                className="text-[0.625rem] transition-transform duration-(--duration-fast) group-open:rotate-180"
+              >
+                ▾
+              </span>
+            </summary>
+            <p className="reading mt-3 text-small text-ink-muted">{t.assistant.moreInfoBody}</p>
+          </details>
         </div>
 
         <div className="flex flex-col">
@@ -183,9 +205,12 @@ export function AskAtlantic({
             </button>
           </form>
 
-          <p className="micro-label mt-4 text-ink-subtle">
-            {product.title} · {t.assistant.demoNote}
-          </p>
+          {/*
+            Just the product name — the demo disclosure already lives at the
+            top of this section. It doesn't need to say "DEMO" a second and
+            third time in the same module.
+          */}
+          <p className="micro-label mt-4 text-ink-subtle">{product.title}</p>
         </div>
       </div>
     </section>
