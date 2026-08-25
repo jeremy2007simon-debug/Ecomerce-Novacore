@@ -29,6 +29,7 @@ export function SiteFooter({
     newsletterPlaceholder: string;
     newsletterCta: string;
     newsletterDemo: string;
+    newsletterInfoLabel: string;
     shop: string;
     about: string;
     help: string;
@@ -83,6 +84,7 @@ export function SiteFooter({
               placeholder: copy.newsletterPlaceholder,
               cta: copy.newsletterCta,
               demo: copy.newsletterDemo,
+              infoLabel: copy.newsletterInfoLabel,
             }}
           />
         </div>

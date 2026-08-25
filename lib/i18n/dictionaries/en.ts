@@ -294,6 +294,7 @@ export const en = {
       newsletterPlaceholder: 'Email address',
       newsletterCta: 'Subscribe',
       newsletterDemo: 'Demo form — no address is stored or transmitted.',
+      newsletterInfoLabel: 'About this demo',
       shop: 'Shop',
       about: 'About',
       help: 'Help',
