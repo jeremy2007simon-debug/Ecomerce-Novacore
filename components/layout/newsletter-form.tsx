@@ -2,6 +2,7 @@
 
 import { useId, useState } from 'react';
 import { DemoBadge } from '@/components/ui/demo-badge';
+import { track } from '@/lib/analytics';
 
 /**
  * Newsletter sign-up — DEMO.
@@ -34,6 +35,7 @@ export function NewsletterForm({
         onSubmit={(event) => {
           event.preventDefault();
           setSent(true);
+          track({ name: 'newsletter_signup', payload: { surface: 'footer' } });
         }}
         className="mt-7 flex items-center gap-3 border-b border-hairline-strong pb-3"
       >

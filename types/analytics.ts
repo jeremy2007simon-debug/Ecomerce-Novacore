@@ -36,7 +36,14 @@ export type AnalyticsEvent =
   | { name: 'language_changed'; payload: { from: Locale; to: Locale } }
   | { name: 'ai_assistant_opened'; payload: { surface: 'pdp' | 'search' | 'nav'; handle?: string } }
   | { name: 'ai_assistant_query'; payload: { intent: string; matched: boolean } }
-  | { name: 'recommendation_clicked'; payload: { from: string; to: string; reasons: string[] } };
+  | { name: 'recommendation_clicked'; payload: { from: string; to: string; reasons: string[] } }
+  | { name: 'select_item'; payload: { productId: string; handle: string; listId: string; position: number } }
+  | { name: 'filter_applied'; payload: { facet: string; value: string } }
+  | { name: 'sort_applied'; payload: { sort: string } }
+  | { name: 'wishlist_add'; payload: { productId: string; variantId: string; handle: string } }
+  | { name: 'story_view'; payload: { storyId: string; handle: string } }
+  | { name: 'size_guide_open'; payload: { productId: string; handle: string } }
+  | { name: 'newsletter_signup'; payload: { surface: 'footer' } };
 
 export type AnalyticsEventName = AnalyticsEvent['name'];
 

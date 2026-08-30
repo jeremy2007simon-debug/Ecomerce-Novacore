@@ -4,6 +4,7 @@
 // not an `m` namespace object, so this is a namespace import.
 import * as m from 'motion/react-m';
 import type { ReactNode } from 'react';
+import { DURATION_SLOW, EASE_OUT_EXPO } from '@/lib/motion/tokens';
 import { cn } from '@/lib/utils/cn';
 
 /**
@@ -16,7 +17,7 @@ import { cn } from '@/lib/utils/cn';
 export function Reveal({
   delay = 0,
   y = 16,
-  duration = 0.62,
+  duration = DURATION_SLOW,
   once = true,
   className,
   children,
@@ -34,7 +35,7 @@ export function Reveal({
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once, margin: '-8% 0px -14% 0px' }}
-      transition={{ duration, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration, delay, ease: EASE_OUT_EXPO }}
     >
       {children}
     </m.div>

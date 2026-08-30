@@ -64,6 +64,18 @@
   --font-mono: var(--font-jetbrains), ui-monospace, 'SF Mono', Menlo, monospace;
   --font-editorial: var(--font-instrument), Georgia, 'Times New Roman', serif;
 
+  /* ── TYPE NAMING ──────────────────────────────────────────────────────────
+     A common brand-brief vocabulary (Display XL / Display / H1 / H2 / H3 /
+     Body / Small / Micro) maps onto the eight sizes below one-to-one — this
+     is a naming note, not a second scale:
+       Display XL → --text-hero      Display → --text-display
+       H1         → --text-headline  H2      → --text-title
+       H3         → --text-subtitle  Body    → --text-body
+       Small      → --text-small     Micro   → --text-micro
+     There is no separate 12-column grid system — `.editorial` (globals.css)
+     is the commerce/content container convention; product and content grids
+     are declared per-component against Tailwind's own grid utilities. */
+
   --text-hero: clamp(3.25rem, 15.5vw, 13rem);
   --text-hero--line-height: 0.86;
   --text-hero--letter-spacing: -0.045em;

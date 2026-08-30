@@ -5,6 +5,7 @@ import { AddToBag } from '@/components/commerce/add-to-bag';
 import { ProductVisual } from '@/components/visual/product-visual';
 import { IconTruck } from '@/components/visual/icons';
 import { SizeGuideDrawer, type SizeGuideCopy } from '@/components/product/size-guide-drawer';
+import { track } from '@/lib/analytics';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { usePDPStore } from '@/lib/store/pdp-store';
 import { cn } from '@/lib/utils/cn';
@@ -197,7 +198,10 @@ export function PurchasePanel({
             */}
             <button
               type="button"
-              onClick={() => setSizeGuideOpen(true)}
+              onClick={() => {
+                setSizeGuideOpen(true);
+                track({ name: 'size_guide_open', payload: { productId: product.id, handle: product.handle } });
+              }}
               className="text-ink underline decoration-hairline-strong underline-offset-4 transition-colors duration-(--duration-fast) hover:decoration-ember"
             >
               {t.product.sizeGuide}

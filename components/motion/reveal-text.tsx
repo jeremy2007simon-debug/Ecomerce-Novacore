@@ -4,6 +4,7 @@
 // not an `m` namespace object, so this is a namespace import.
 import * as m from 'motion/react-m';
 import { useMemo } from 'react';
+import { DURATION_SCENE, EASE_OUT_EXPO } from '@/lib/motion/tokens';
 import { cn } from '@/lib/utils/cn';
 import { useOptionalScene } from './scene-context';
 import { SceneLayer, type Range } from './scene-layer';
@@ -114,9 +115,9 @@ export function RevealText({
             whileInView={{ clipPath: 'inset(-12% -6% -12% -6%)', y: 0 }}
             viewport={{ once: true, margin: '-12% 0px -18% 0px' }}
             transition={{
-              duration: 0.9,
+              duration: DURATION_SCENE,
               delay: delay + i * stagger,
-              ease: [0.16, 1, 0.3, 1],
+              ease: EASE_OUT_EXPO,
             }}
           >
             {part}

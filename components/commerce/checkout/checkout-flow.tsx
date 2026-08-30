@@ -23,7 +23,7 @@ import {
 } from './checkout-machine';
 import { track } from '@/lib/analytics';
 import { useLocale } from '@/lib/i18n/locale-provider';
-import { orderTotal, subtotal } from '@/lib/commerce/cart-math';
+import { FREE_SHIPPING_THRESHOLD, orderTotal, subtotal } from '@/lib/commerce/cart-math';
 import { useCartHydrated, useCartLines, useCartStore } from '@/lib/store/cart-store';
 import { cn } from '@/lib/utils/cn';
 import { formatMoney } from '@/lib/utils/money';
@@ -313,7 +313,7 @@ export function CheckoutFlow({ title }: { title: string }) {
                           </span>
                         </span>
                         <span className="label shrink-0 text-ember" data-numeric>
-                          {method === 'standard' || subtotal(lines).amount >= 12000
+                          {method === 'standard' || subtotal(lines).amount >= FREE_SHIPPING_THRESHOLD
                             ? t.cart.shippingFree
                             : formatMoney({ amount: 590, currencyCode: 'EUR' }, locale)}
                         </span>

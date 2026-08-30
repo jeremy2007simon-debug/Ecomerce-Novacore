@@ -8,6 +8,7 @@ import { ContourField } from '@/components/visual/contour-field';
 import { IconArrowRight, IconClose } from '@/components/visual/icons';
 import { LocaleSwitcher } from './locale-switcher';
 import { useLocale } from '@/lib/i18n/locale-provider';
+import { DURATION_SLOW, EASE_OUT_EXPO } from '@/lib/motion/tokens';
 import { useIsOverlayOpen, useUIStore } from '@/lib/store/ui-store';
 import { routes } from '@/lib/utils/routes';
 import type { Collection } from '@/types/commerce';
@@ -67,7 +68,7 @@ export function MobileMenu({
               <m.div
                 initial={{ y: '110%' }}
                 animate={{ y: 0 }}
-                transition={{ delay: 0.06 + i * 0.045, duration: 0.62, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ delay: 0.06 + i * 0.045, duration: DURATION_SLOW, ease: EASE_OUT_EXPO }}
               >
                 <Link
                   href={link.href}
