@@ -33,6 +33,7 @@ export const routes = {
   returns: (locale: Locale) => route(`/${locale}/returns`),
   sizeGuide: (locale: Locale) => route(`/${locale}/size-guide`),
   contact: (locale: Locale) => route(`/${locale}/contact`),
+  trackOrder: (locale: Locale) => route(`/${locale}/track-order`),
   terms: (locale: Locale) => route(`/${locale}/terms`),
   privacy: (locale: Locale) => route(`/${locale}/privacy`),
   dashboard: (locale: Locale) => route(`/${locale}/demo/dashboard`),

@@ -58,6 +58,7 @@ export function Overlay({
   onClose,
   placement = 'right',
   label,
+  id,
   className,
   children,
 }: {
@@ -65,6 +66,8 @@ export function Overlay({
   onClose: () => void;
   placement?: OverlayPlacement;
   label: string;
+  /** Lets a trigger button reference this panel via aria-controls. */
+  id?: string;
   className?: string;
   children: ReactNode;
 }) {
@@ -114,6 +117,7 @@ export function Overlay({
 
           <m.div
             ref={panelRef}
+            id={id}
             role="dialog"
             aria-modal="true"
             aria-label={label}

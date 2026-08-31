@@ -91,7 +91,7 @@ export function CartDrawer() {
   const lastAddedId = isDemoMode ? demoLastAddedId : null;
 
   return (
-    <Overlay open={open} onClose={close} placement="right" label={t.cart.title}>
+    <Overlay id="cart-drawer-panel" open={open} onClose={close} placement="right" label={t.cart.title}>
       <header className="flex items-center justify-between gap-4 border-b border-hairline px-5 py-4">
         <div className="flex items-baseline gap-3">
           <h2 className="label text-ink">{t.cart.title}</h2>

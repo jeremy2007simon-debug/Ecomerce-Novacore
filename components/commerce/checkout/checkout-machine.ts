@@ -13,6 +13,8 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+import { isValidEmail } from '@/lib/utils/email';
+
 export const CHECKOUT_STEPS = ['contact', 'delivery', 'payment', 'confirmation'] as const;
 export type CheckoutStep = (typeof CHECKOUT_STEPS)[number];
 
@@ -111,7 +113,6 @@ const REQUIRED: Record<CheckoutStep, (keyof CheckoutFields)[]> = {
   confirmation: [],
 };
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const POSTAL_PATTERN = /^\d{5}$/;
 
 export function validateStep(
@@ -127,7 +128,7 @@ export function validateStep(
     }
   }
 
-  if (step === 'contact' && fields.email.trim() && !EMAIL_PATTERN.test(fields.email.trim())) {
+  if (step === 'contact' && fields.email.trim() && !isValidEmail(fields.email)) {
     errors.email = messages.invalidEmail;
   }
 

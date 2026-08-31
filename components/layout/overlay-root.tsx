@@ -32,11 +32,9 @@ const MobileMenu = dynamic(() => import('@/components/layout/mobile-menu').then(
 export function OverlayRoot({
   products,
   collections,
-  nav,
 }: {
   products: Product[];
   collections: Collection[];
-  nav: { shop: string; story: string; close: string; menu: string };
 }) {
   const overlay = useOverlay();
   const [warm, setWarm] = useState(false);
@@ -81,8 +79,8 @@ export function OverlayRoot({
   return (
     <>
       <CartDrawer />
-      <SearchOverlay products={products} />
-      <MobileMenu collections={collections} nav={nav} />
+      <SearchOverlay products={products} collections={collections} />
+      <MobileMenu />
     </>
   );
 }

@@ -15,7 +15,7 @@ import { track } from '@/lib/analytics';
  * because there is nowhere to store that state.
  */
 
-export type OverlayId = 'cart' | 'search' | 'menu' | 'assistant';
+export type OverlayId = 'cart' | 'search' | 'menu' | 'megamenu' | 'assistant';
 
 interface UIState {
   overlay: OverlayId | null;

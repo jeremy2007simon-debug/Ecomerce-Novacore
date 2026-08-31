@@ -165,12 +165,21 @@
 
   --breakpoint-xs: 26.25rem;
 
+  /* The fixed header row's height — replaces three literal h-16 usages
+     (site-header.tsx, mobile-menu.tsx, search-overlay.tsx) that had no
+     shared source of truth. Same value as h-16 (4rem); introducing the
+     token changes nothing visually. */
+  --header-height: 4rem;
+
   /* ── DEPTH ────────────────────────────────────────────────────────────────
      A single z-index ladder. Anything not listed here does not get a z-index.  */
 
   --z-base: 0;
   --z-sticky: 20;
   --z-header: 40;
+  /* The mega-menu dropdown: above page content, below the fullscreen
+     overlays (cart/search/mobile-menu), which already scrim the header. */
+  --z-header-panel: 45;
   --z-overlay: 60;
   --z-toast: 80;
   --z-loader: 100;

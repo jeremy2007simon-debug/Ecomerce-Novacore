@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AtlanticMonogram } from '@/components/visual/atlantic-mark';
 import { NewsletterForm } from './newsletter-form';
+import { LocaleSwitcher } from './locale-switcher';
 import { Rule } from '@/components/ui/rule';
 import { routes } from '@/lib/utils/routes';
 import type { Locale } from '@/types/i18n';
@@ -13,10 +14,13 @@ import type { Locale } from '@/types/i18n';
  * the demo only works as a sales asset if Atlantic Supply reads as a real
  * company, and a real company does not carry its agency's logo on every page.
  *
- * Every link here goes somewhere real. Ten differently-labelled links used to
- * resolve to `/story` — a page that says nothing about shipping, returns,
- * sizing, contact or the legal terms. Six of them now have pages; materials
- * and sustainability point at the sections of the story that cover them.
+ * Every link here goes somewhere real. Discover replaces the old About column
+ * — same destinations (story, materials, sustainability), renamed, plus
+ * Lookbook marked "soon" rather than pointing anywhere fabricated (there is no
+ * lookbook page yet — that is Phase 7). Legal deliberately carries only Terms
+ * and Privacy: the dictionary's `links.cookies` stays declared-but-unused
+ * rather than linking to a `#cookies` anchor that does not exist on the
+ * Privacy page, or duplicating the Privacy link outright.
  */
 export function SiteFooter({
   locale,
@@ -30,10 +34,15 @@ export function SiteFooter({
     newsletterCta: string;
     newsletterDemo: string;
     newsletterInfoLabel: string;
+    newsletterLoading: string;
+    soon: string;
     shop: string;
-    about: string;
+    discover: string;
     help: string;
     legal: string;
+    language: string;
+    country: string;
+    countryValue: string;
     rights: string;
     novacore: string;
     links: Record<string, string>;
@@ -50,15 +59,15 @@ export function SiteFooter({
       ],
     },
     {
-      title: copy.about,
+      title: copy.discover,
       links: [
         { label: copy.links.story, href: routes.story(locale) },
         // Materials and sustainability are sections of the story, not pages of
-        // their own — the material coda and the "making" chapter. They now
-        // link to those sections rather than to the top of `/story`.
+        // their own — the material coda and the "making" chapter.
         { label: copy.links.materials, href: routes.storyAnchor(locale, 'materials') },
         { label: copy.links.sustainability, href: routes.storyAnchor(locale, 'making') },
       ],
+      soon: [{ label: copy.links.lookbook }],
     },
     {
       title: copy.help,
@@ -67,6 +76,14 @@ export function SiteFooter({
         { label: copy.links.returns, href: routes.returns(locale) },
         { label: copy.links.sizeGuide, href: routes.sizeGuide(locale) },
         { label: copy.links.contact, href: routes.contact(locale) },
+        { label: copy.links.trackOrder, href: routes.trackOrder(locale) },
+      ],
+    },
+    {
+      title: copy.legal,
+      links: [
+        { label: copy.links.terms, href: routes.terms(locale) },
+        { label: copy.links.privacy, href: routes.privacy(locale) },
       ],
     },
   ];
@@ -85,11 +102,23 @@ export function SiteFooter({
               cta: copy.newsletterCta,
               demo: copy.newsletterDemo,
               infoLabel: copy.newsletterInfoLabel,
+              loading: copy.newsletterLoading,
             }}
           />
+
+          <div className="mt-10 flex items-center gap-6 border-t border-hairline pt-6">
+            <div>
+              <p className="micro-label text-ink-subtle">{copy.language}</p>
+              <LocaleSwitcher className="mt-1.5" />
+            </div>
+            <div>
+              <p className="micro-label text-ink-subtle">{copy.country}</p>
+              <p className="mt-1.5 text-small text-ink-muted">{copy.countryValue}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           {columns.map((column) => (
             <nav key={column.title} aria-label={column.title}>
               <Rule label={column.title} className="mb-5" />
@@ -109,6 +138,12 @@ export function SiteFooter({
                     </Link>
                   </li>
                 ))}
+                {column.soon?.map((item) => (
+                  <li key={item.label} className="inline-flex items-center gap-2 text-small text-ink-subtle">
+                    {item.label}
+                    <span className="micro-label rounded-pill border border-hairline px-1.5 py-0.5">{copy.soon}</span>
+                  </li>
+                ))}
               </ul>
             </nav>
           ))}
@@ -123,24 +158,8 @@ export function SiteFooter({
           </p>
         </div>
 
-        <div className="flex items-center gap-6">
-          <Link
-            href={routes.terms(locale)}
-            prefetch={false}
-            className="micro-label text-ink-subtle hover:text-ink"
-          >
-            {copy.links.terms}
-          </Link>
-          <Link
-            href={routes.privacy(locale)}
-            prefetch={false}
-            className="micro-label text-ink-subtle hover:text-ink"
-          >
-            {copy.links.privacy}
-          </Link>
-          {/* The single NovaCore mention on the entire storefront. */}
-          <p className="micro-label text-ink-subtle">{copy.novacore}</p>
-        </div>
+        {/* The single NovaCore mention on the entire storefront. */}
+        <p className="micro-label text-ink-subtle">{copy.novacore}</p>
       </div>
     </footer>
   );

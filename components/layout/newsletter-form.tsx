@@ -3,41 +3,51 @@
 import { useId, useState } from 'react';
 import { DemoBadge } from '@/components/ui/demo-badge';
 import { track } from '@/lib/analytics';
+import { useLocale } from '@/lib/i18n/locale-provider';
+import { isValidEmail } from '@/lib/utils/email';
+
+type Status = 'idle' | 'loading' | 'success' | 'error';
 
 /**
  * Newsletter sign-up — DEMO.
  *
- * NOTHING IS TRANSMITTED. No action, no fetch, no storage.
- *
- * What changed, and why it mattered: the form carried `action="#"` and a
- * `type="button"` submit control. So the button did nothing at all, while
- * pressing Enter in the field triggered a real GET navigation to `#` — the
- * page reloaded and the shopper lost their bag drawer, their scroll position
- * and any filter they had applied. A demo that is inert should be inert in
- * both directions.
- *
- * Now: `onSubmit` calls `preventDefault`, there is no `action` to fall back
- * to, the input carries a `name`, and both Enter and the button reach the same
- * acknowledgement.
+ * NOTHING IS TRANSMITTED. No action, no fetch, no storage. The `loading` pause
+ * is a fixed short timeout — explicitly simulated latency, not a real network
+ * request — and `error` is driven by real email-shape validation (the same
+ * `isValidEmail` checkout uses), never a fabricated random failure rate. A
+ * fake failure chance would read as a bug in a demo whose entire point is to
+ * look production-real.
  */
 export function NewsletterForm({
   copy,
 }: {
-  copy: { placeholder: string; cta: string; demo: string; infoLabel: string };
+  copy: { placeholder: string; cta: string; demo: string; infoLabel: string; loading: string };
 }) {
+  const { t } = useLocale();
   const id = useId();
   const [value, setValue] = useState('');
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<Status>('idle');
 
   return (
     <>
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          setSent(true);
-          track({ name: 'newsletter_signup', payload: { surface: 'footer' } });
+          if (status === 'loading') return;
+
+          if (!isValidEmail(value)) {
+            setStatus('error');
+            return;
+          }
+
+          setStatus('loading');
+          window.setTimeout(() => {
+            setStatus('success');
+            track({ name: 'newsletter_signup', payload: { surface: 'footer' } });
+          }, 500);
         }}
         className="mt-7 flex items-center gap-3 border-b border-hairline-strong pb-3"
+        noValidate
       >
         <label htmlFor={id} className="sr-only">
           {copy.placeholder}
@@ -49,25 +59,35 @@ export function NewsletterForm({
           value={value}
           onChange={(event) => {
             setValue(event.target.value);
-            if (sent) setSent(false);
+            if (status !== 'idle' && status !== 'loading') setStatus('idle');
           }}
           placeholder={copy.placeholder}
-          className="w-full bg-transparent text-small text-ink outline-none placeholder:text-ink-subtle"
+          aria-invalid={status === 'error'}
+          aria-describedby={status === 'error' ? `${id}-error` : undefined}
+          disabled={status === 'loading'}
+          className="w-full bg-transparent text-small text-ink outline-none placeholder:text-ink-subtle disabled:opacity-60"
         />
         <button
           type="submit"
-          className="label shrink-0 text-ember transition-colors duration-(--duration-fast) hover:text-paper"
+          disabled={status === 'loading'}
+          className="label shrink-0 text-ember transition-colors duration-(--duration-fast) hover:text-paper disabled:opacity-60"
         >
-          {copy.cta}
+          {status === 'loading' ? copy.loading : copy.cta}
         </button>
       </form>
 
-      <p
-        className="micro-label mt-3 flex items-center gap-2 text-ink-subtle"
-        {...(sent ? { role: 'status' } : {})}
-      >
-        <DemoBadge />
-      </p>
+      {status === 'error' ? (
+        <p id={`${id}-error`} role="alert" className="mt-3 text-small text-ember">
+          {t.checkout.invalidEmail}
+        </p>
+      ) : (
+        <p
+          className="micro-label mt-3 flex items-center gap-2 text-ink-subtle"
+          {...(status === 'success' ? { role: 'status' } : {})}
+        >
+          <DemoBadge />
+        </p>
+      )}
 
       <details className="group mt-2">
         <summary className="label inline-flex cursor-pointer list-none items-center gap-2 text-ink-subtle [&::-webkit-details-marker]:hidden">

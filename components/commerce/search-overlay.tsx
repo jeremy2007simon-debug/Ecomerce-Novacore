@@ -10,82 +10,169 @@ import { ProductVisual } from '@/components/visual/product-visual';
 import { IconClose, IconSearch } from '@/components/visual/icons';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { useIsOverlayOpen, useUIStore } from '@/lib/store/ui-store';
-import { searchIndex } from '@/lib/commerce/search';
+import {
+  POPULAR_SEARCHES,
+  searchCollections,
+  searchIndex,
+  searchStories,
+  topTrending,
+  type CollectionSearchHit,
+  type StorySearchHit,
+} from '@/lib/commerce/search-providers';
 import { track } from '@/lib/analytics';
 import { formatMoney } from '@/lib/utils/money';
 import { routes } from '@/lib/utils/routes';
-import type { Product } from '@/types/commerce';
+import type { Collection, Product } from '@/types/commerce';
 
 /**
- * Instant search.
+ * Instant, sectioned search.
  *
- * The whole product index is passed in from the server — eight products is a
- * few kilobytes, and shipping it means results appear on the keystroke with no
- * network round trip at all. That is what makes typing "atl" feel instant
- * rather than merely fast.
+ * The whole product index and collection list are passed in from the server —
+ * a few kilobytes together — so results appear on the keystroke with no
+ * network round trip at all. Stories come from lib/commerce/search-providers,
+ * a small hand-authored demo dataset (see data/stories.ts).
  *
  * `useDeferredValue` keeps the input responsive: React renders the character
- * immediately and the (cheap, but non-zero) ranked list at a lower priority, so
- * the caret never lags the thumb.
+ * immediately and the (cheap, but non-zero) ranked lists at a lower priority.
  *
- * PRODUCTION NOTE: with a real catalogue this becomes a debounced request to a
- * search service. The component boundary does not change — only the source of
- * `results`.
+ * PRODUCTION NOTE: with a real catalogue/search service this becomes a
+ * debounced request. The component boundary does not change — only the
+ * source of each section's results.
  */
-export function SearchOverlay({ products }: { products: Product[] }) {
+export function SearchOverlay({ products, collections }: { products: Product[]; collections: Collection[] }) {
   const { t } = useLocale();
   const open = useIsOverlayOpen('search');
   const close = useUIStore((state) => state.close);
 
   return (
-    <Overlay open={open} onClose={close} placement="full" label={t.search.placeholder} className="bg-void">
+    <Overlay
+      id="search-overlay-panel"
+      open={open}
+      onClose={close}
+      placement="full"
+      label={t.search.placeholder}
+      className="bg-void"
+    >
       {/*
         Keyed on `open`, so the panel — and with it the query — is thrown away
-        and rebuilt every time the overlay opens. Resetting state with a key is
-        the React-idiomatic alternative to clearing it from an effect, and it
-        removes a render pass rather than adding one.
+        and rebuilt every time the overlay opens.
       */}
-      <SearchPanel key={open ? 'open' : 'closed'} products={products} onClose={close} />
+      <SearchPanel key={open ? 'open' : 'closed'} products={products} collections={collections} onClose={close} />
     </Overlay>
   );
 }
 
+type ResultEntry =
+  | { kind: 'product'; key: string; product: Product; href: ReturnType<typeof routes.product> }
+  | { kind: 'collection'; key: string; hit: CollectionSearchHit; href: ReturnType<typeof routes.collectionFiltered> }
+  | { kind: 'story'; key: string; hit: StorySearchHit; href: ReturnType<typeof routes.story> };
+
 function SearchPanel({
   products,
+  collections,
   onClose,
 }: {
   products: Product[];
+  collections: Collection[];
   onClose: () => void;
 }) {
   const { t, locale, fmt } = useLocale();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(-1);
   const deferredQuery = useDeferredValue(query);
+  const hasQuery = query.trim().length > 0;
 
-  const results = useMemo(
+  // The active index only makes sense against the current result set — reset
+  // it during render when the settled query changes, React's documented
+  // pattern for adjusting state in response to a prop/derived-value change
+  // (https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes).
+  const [resetForQuery, setResetForQuery] = useState(deferredQuery);
+  if (resetForQuery !== deferredQuery) {
+    setResetForQuery(deferredQuery);
+    setActiveIndex(-1);
+  }
+
+  const productHits = useMemo(
     () => searchIndex(products, deferredQuery, 6).map((hit) => hit.product),
     [products, deferredQuery],
   );
+  const collectionHits = useMemo(
+    () => searchCollections(collections, deferredQuery, 3),
+    [collections, deferredQuery],
+  );
+  const storyHits = useMemo(() => searchStories(deferredQuery, locale, 3), [deferredQuery, locale]);
+
+  const entries: ResultEntry[] = useMemo(
+    () => [
+      ...productHits.map((product): ResultEntry => ({
+        kind: 'product',
+        key: `product-${product.handle}`,
+        product,
+        href: routes.product(locale, product.handle),
+      })),
+      ...collectionHits.map((hit): ResultEntry => ({
+        kind: 'collection',
+        key: `collection-${hit.collection.handle}`,
+        hit,
+        href: routes.collectionFiltered(locale, `collection=${hit.collection.handle}`),
+      })),
+      ...storyHits.map((hit): ResultEntry => ({
+        kind: 'story',
+        key: `story-${hit.story.id}`,
+        hit,
+        href: routes.story(locale),
+      })),
+    ],
+    [productHits, collectionHits, storyHits, locale],
+  );
+
+  const totalResultCount = entries.length;
 
   // Fire one analytics event per settled query rather than per keystroke.
   useEffect(() => {
     if (deferredQuery.trim().length < 2) return;
     const timer = setTimeout(() => {
-      track({
-        name: 'search',
-        payload: { query: deferredQuery, resultCount: results.length },
-      });
+      track({ name: 'search', payload: { query: deferredQuery, resultCount: totalResultCount } });
     }, 600);
     return () => clearTimeout(timer);
-  }, [deferredQuery, results.length]);
+  }, [deferredQuery, totalResultCount]);
 
-  const popular = products.slice(0, 4);
-  const hasQuery = query.trim().length > 0;
+  const trending = useMemo(() => topTrending(products, 4), [products]);
+  const popular = POPULAR_SEARCHES[locale];
+
+  const navigateTo = (entry: ResultEntry) => {
+    if (entry.kind === 'product') {
+      track({
+        name: 'select_item',
+        payload: { productId: entry.product.id, handle: entry.product.handle, listId: 'search_results', position: entries.indexOf(entry) },
+      });
+    } else if (entry.kind === 'story') {
+      track({ name: 'story_view', payload: { storyId: entry.hit.story.id, handle: '' } });
+    }
+    router.push(entry.href);
+    onClose();
+  };
+
+  const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!hasQuery || entries.length === 0) return;
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setActiveIndex((i) => (i + 1) % entries.length);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setActiveIndex((i) => (i <= 0 ? entries.length - 1 : i - 1));
+    } else if (event.key === 'Enter' && activeIndex >= 0) {
+      event.preventDefault();
+      const entry = entries[activeIndex];
+      if (entry) navigateTo(entry);
+    }
+  };
 
   return (
     <>
-      <div className="safe-top gutter flex h-16 items-center justify-end">
+      <div className="safe-top gutter flex h-(--header-height) items-center justify-end">
         <button
           type="button"
           onClick={onClose}
@@ -97,20 +184,15 @@ function SearchPanel({
       </div>
 
       <div className="gutter flex grow flex-col overflow-y-auto overscroll-contain pb-10">
-        {/*
-          A real <form>, and a large unadorned input on a hairline.
-
-          It used to be a bare input, so Enter — the single most natural thing
-          to press after typing a query — did nothing at all. Submitting now
-          goes to `/search?q=…`, the server-rendered results page that already
-          existed and that nothing in the app linked to: `routes.search` had
-          zero call sites. The overlay stays the fast path; the page is what
-          makes a query shareable, bookmarkable and reachable without JS.
-        */}
+        {/* A real <form>: Enter with nothing selected goes to /search?q=… */}
         <form
           role="search"
           onSubmit={(event) => {
             event.preventDefault();
+            if (activeIndex >= 0) {
+              const entry = entries[activeIndex];
+              if (entry) return navigateTo(entry);
+            }
             const term = query.trim();
             if (!term) return;
             router.push(routes.search(locale, term));
@@ -121,13 +203,16 @@ function SearchPanel({
           <IconSearch className="size-6 shrink-0 text-ink-subtle" />
           <input
             ref={inputRef}
-            // Focused when the overlay opens. Without it the trap takes the
-            // first focusable in DOM order, which is the close button.
             data-autofocus
             type="search"
             name="q"
+            role="combobox"
+            aria-expanded={hasQuery && entries.length > 0}
+            aria-controls="search-results-listbox"
+            aria-activedescendant={activeIndex >= 0 ? entries[activeIndex]?.key : undefined}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={onInputKeyDown}
             placeholder={t.search.placeholder}
             aria-label={t.search.placeholder}
             autoComplete="off"
@@ -147,12 +232,14 @@ function SearchPanel({
           ) : null}
         </form>
 
-        <p className="label mt-5 text-ink-subtle" aria-live="polite">
-          {hasQuery ? fmt(t.search.resultCount, { count: results.length }) : t.search.placeholder}
-        </p>
+        {hasQuery ? (
+          <p className="label mt-5 text-ink-subtle" aria-live="polite">
+            {fmt(t.search.resultCount, { count: totalResultCount })}
+          </p>
+        ) : null}
 
         <AnimatePresence mode="wait" initial={false}>
-          {hasQuery && results.length === 0 ? (
+          {hasQuery && totalResultCount === 0 ? (
             <m.div
               key="empty"
               initial={{ opacity: 0, y: 8 }}
@@ -161,51 +248,222 @@ function SearchPanel({
               transition={{ duration: 0.16 }}
               className="py-16"
             >
-              <p className="text-title font-medium text-ink">
-                {fmt(t.search.noResults, { query })}
-              </p>
+              <p className="text-title font-medium text-ink">{fmt(t.search.noResults, { query })}</p>
               <p className="mt-3 text-small text-ink-muted">{t.search.noResultsBody}</p>
             </m.div>
-          ) : (
-            <m.ul
-              key={hasQuery ? 'results' : 'popular'}
+          ) : hasQuery ? (
+            <m.div
+              key="results"
+              id="search-results-listbox"
+              role="listbox"
+              aria-label={fmt(t.search.resultCount, { count: totalResultCount })}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              // Deliberately fast: search results that ease in over half a
-              // second feel slower than a page that simply loaded.
               transition={{ duration: 0.14 }}
-              className="mt-6 flex flex-col"
+              className="mt-6 flex flex-col gap-8"
             >
-              {(hasQuery ? results : popular).map((product, i) => (
-                <m.li
-                  key={product.handle}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.24, delay: i * 0.035, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <Link
-                    href={routes.product(locale, product.handle)}
-                    onClick={onClose}
-                    className="group flex items-center gap-4 border-b border-hairline py-4"
-                  >
-                    <div className="w-14 shrink-0">
-                      <ProductVisual media={product.media[0]!} slot="thumb" />
-                    </div>
-                    <div className="min-w-0 grow">
-                      <p className="truncate text-[0.9375rem] font-medium text-ink">{product.title}</p>
-                      <p className="truncate text-small text-ink-muted">{product.subtitle}</p>
-                    </div>
-                    <p className="label shrink-0 text-ink-muted" data-numeric>
-                      {formatMoney(product.priceRange.min, locale)}
-                    </p>
-                  </Link>
-                </m.li>
-              ))}
-            </m.ul>
+              {productHits.length > 0 ? (
+                <ResultSection title={t.search.productsTitle}>
+                  {productHits.map((product, i) => {
+                    const entry = entries[i]!;
+                    return (
+                      <ProductRow
+                        key={entry.key}
+                        entry={entry}
+                        product={product}
+                        active={activeIndex === i}
+                        locale={locale}
+                        onClick={() => navigateTo(entry)}
+                      />
+                    );
+                  })}
+                </ResultSection>
+              ) : null}
+
+              {collectionHits.length > 0 ? (
+                <ResultSection title={t.search.collectionsTitle}>
+                  {collectionHits.map((hit, i) => {
+                    const index = productHits.length + i;
+                    const entry = entries[index]!;
+                    return (
+                      <TextRow
+                        key={entry.key}
+                        id={entry.key}
+                        active={activeIndex === index}
+                        title={hit.collection.title}
+                        body={hit.collection.description}
+                        href={entry.href}
+                        onClick={() => navigateTo(entry)}
+                      />
+                    );
+                  })}
+                </ResultSection>
+              ) : null}
+
+              {storyHits.length > 0 ? (
+                <ResultSection title={t.search.storiesTitle}>
+                  {storyHits.map((hit, i) => {
+                    const index = productHits.length + collectionHits.length + i;
+                    const entry = entries[index]!;
+                    return (
+                      <TextRow
+                        key={entry.key}
+                        id={entry.key}
+                        active={activeIndex === index}
+                        title={hit.story.title[locale]}
+                        body={hit.story.excerpt[locale]}
+                        href={entry.href}
+                        onClick={() => navigateTo(entry)}
+                      />
+                    );
+                  })}
+                </ResultSection>
+              ) : null}
+            </m.div>
+          ) : (
+            <m.div
+              key="idle"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.14 }}
+              className="mt-8 flex flex-col gap-8"
+            >
+              {popular && popular.length > 0 ? (
+                <div>
+                  <p className="micro-label text-ink-subtle">{t.search.popularSearchesTitle}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {popular.map((term) => (
+                      <button
+                        key={term}
+                        type="button"
+                        onClick={() => setQuery(term)}
+                        className="label rounded-pill border border-hairline px-3 py-1.5 text-ink-muted transition-colors hover:border-hairline-strong hover:text-ink"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {trending.length > 0 ? (
+                <div>
+                  <p className="micro-label text-ink-subtle">{t.search.trendingTitle}</p>
+                  <ul className="mt-3 flex flex-col">
+                    {trending.map((product, i) => (
+                      <li key={product.handle}>
+                        <Link
+                          href={routes.product(locale, product.handle)}
+                          onClick={() => {
+                            track({
+                              name: 'select_item',
+                              payload: { productId: product.id, handle: product.handle, listId: 'search_trending', position: i },
+                            });
+                            onClose();
+                          }}
+                          className="group flex items-center gap-4 border-b border-hairline py-4"
+                        >
+                          <div className="w-14 shrink-0">
+                            <ProductVisual media={product.media[0]!} slot="thumb" />
+                          </div>
+                          <div className="min-w-0 grow">
+                            <p className="truncate text-[0.9375rem] font-medium text-ink">{product.title}</p>
+                            <p className="truncate text-small text-ink-muted">{product.subtitle}</p>
+                          </div>
+                          <p className="label shrink-0 text-ink-muted" data-numeric>
+                            {formatMoney(product.priceRange.min, locale)}
+                          </p>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </m.div>
           )}
         </AnimatePresence>
       </div>
     </>
+  );
+}
+
+function ResultSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="micro-label text-ink-subtle">{title}</p>
+      <ul className="mt-3 flex flex-col">{children}</ul>
+    </div>
+  );
+}
+
+function ProductRow({
+  entry,
+  product,
+  active,
+  locale,
+  onClick,
+}: {
+  entry: ResultEntry;
+  product: Product;
+  active: boolean;
+  locale: Parameters<typeof formatMoney>[1];
+  onClick: () => void;
+}) {
+  return (
+    <li id={entry.key} role="option" aria-selected={active}>
+      <Link
+        href={entry.href}
+        onClick={(event) => {
+          event.preventDefault();
+          onClick();
+        }}
+        className={`group flex items-center gap-4 border-b border-hairline py-4 ${active ? 'bg-surface-raised' : ''}`}
+      >
+        <div className="w-14 shrink-0">
+          <ProductVisual media={product.media[0]!} slot="thumb" />
+        </div>
+        <div className="min-w-0 grow">
+          <p className="truncate text-[0.9375rem] font-medium text-ink">{product.title}</p>
+          <p className="truncate text-small text-ink-muted">{product.subtitle}</p>
+        </div>
+        <p className="label shrink-0 text-ink-muted" data-numeric>
+          {formatMoney(product.priceRange.min, locale)}
+        </p>
+      </Link>
+    </li>
+  );
+}
+
+function TextRow({
+  id,
+  active,
+  title,
+  body,
+  href,
+  onClick,
+}: {
+  id: string;
+  active: boolean;
+  title: string;
+  body: string;
+  href: string;
+  onClick: () => void;
+}) {
+  return (
+    <li id={id} role="option" aria-selected={active}>
+      <Link
+        href={href as ReturnType<typeof routes.story>}
+        onClick={(event) => {
+          event.preventDefault();
+          onClick();
+        }}
+        className={`block border-b border-hairline py-4 ${active ? 'bg-surface-raised' : ''}`}
+      >
+        <p className="text-[0.9375rem] font-medium text-ink">{title}</p>
+        <p className="mt-1 truncate text-small text-ink-muted">{body}</p>
+      </Link>
+    </li>
   );
 }

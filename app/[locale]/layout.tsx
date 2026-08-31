@@ -128,16 +128,12 @@ export default async function RootLayout({
                 it. The overlays themselves portal OUTSIDE this element.
               */}
               <div id="app-root">
-                <SiteHeader nav={t.nav} />
+                <SiteHeader nav={t.nav} products={catalogue.nodes} />
                 {children}
                 <SiteFooter locale={typedLocale} copy={t.footer} />
               </div>
 
-              <OverlayRoot
-                products={catalogue.nodes}
-                collections={collections}
-                nav={{ shop: t.nav.shop, story: t.nav.story, close: t.nav.close, menu: t.nav.menu }}
-              />
+              <OverlayRoot products={catalogue.nodes} collections={collections} />
             </MotionProvider>
           </LocaleProvider>
 
