@@ -19,7 +19,8 @@ import { Rule } from '@/components/ui/rule';
 import { MaterialMacro } from '@/components/visual/material-macro';
 import { ProductVisual } from '@/components/visual/product-visual';
 import { commerce } from '@/lib/commerce';
-import { getServerDictionary } from '@/lib/i18n/get-dictionary';
+import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
+import { buildProductCardCopy } from '@/lib/i18n/product-card-copy';
 import { breadcrumbJsonLd, productJsonLd } from '@/lib/seo/json-ld';
 import { routes } from '@/lib/utils/routes';
 import { isLocale, LOCALES } from '@/types/i18n';
@@ -97,12 +98,14 @@ export default async function ProductPage({
   const product = await commerce.getProduct(handle, { locale });
   if (!product) notFound();
 
-  const [t, reviews, recommendations, catalogue] = await Promise.all([
+  const [t, clientT, reviews, recommendations, catalogue] = await Promise.all([
     getServerDictionary(locale),
+    getClientDictionary(locale),
     commerce.getReviews(handle, { first: 12, sort: 'recent' }, { locale }),
     commerce.getRecommendations(handle, { intent: 'related', limit: 4 }, { locale }),
     commerce.getProducts({ collection: 'all', first: 50 }, { locale }),
   ]);
+  const productCardCopy = buildProductCardCopy(t, clientT);
 
   const hero = product.media[0]!;
   const galleryMedia = product.media.slice(1);
@@ -282,7 +285,12 @@ export default async function ProductPage({
       </section>
 
       {/* ── RECOMMENDATIONS ──────────────────────────────────────────────── */}
-      <RelatedProducts recommendations={recommendations} locale={locale} copy={t.product} />
+      <RelatedProducts
+        recommendations={recommendations}
+        locale={locale}
+        copy={t.product}
+        productCardCopy={productCardCopy}
+      />
 
       {/* ── ASK ATLANTIC ─────────────────────────────────────────────────── */}
       <AskAtlantic

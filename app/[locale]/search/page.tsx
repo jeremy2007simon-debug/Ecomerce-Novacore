@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { commerce } from '@/lib/commerce';
-import { getServerDictionary } from '@/lib/i18n/get-dictionary';
+import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
+import { buildProductCardCopy } from '@/lib/i18n/product-card-copy';
 import { routes } from '@/lib/utils/routes';
 import { isLocale } from '@/types/i18n';
 
@@ -47,10 +48,12 @@ export default async function SearchPage({
   if (!isLocale(locale)) notFound();
 
   const term = typeof query.q === 'string' ? query.q : '';
-  const [t, results] = await Promise.all([
+  const [t, clientT, results] = await Promise.all([
     getServerDictionary(locale),
+    getClientDictionary(locale),
     term.trim() ? commerce.searchProducts(term, { locale }) : Promise.resolve([]),
   ]);
+  const productCardCopy = buildProductCardCopy(t, clientT);
 
   return (
     <main id="main" className="editorial pb-(--spacing-section) pt-28 lg:pt-36">
@@ -99,7 +102,7 @@ export default async function SearchPage({
           </p>
           <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-14 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
             {results.map((product, i) => (
-              <ProductCard key={product.handle} product={product} locale={locale} index={i} />
+              <ProductCard key={product.handle} product={product} locale={locale} index={i} copy={productCardCopy} />
             ))}
           </div>
         </>

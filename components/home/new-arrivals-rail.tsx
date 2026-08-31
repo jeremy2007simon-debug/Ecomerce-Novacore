@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { ProductCard } from '@/components/commerce/product-card';
+import { ProductCard, type ProductCardCopy } from '@/components/commerce/product-card';
 import { Reveal, RevealText } from '@/components/motion';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { IconArrowRight } from '@/components/visual/icons';
@@ -24,10 +24,12 @@ export function NewArrivalsRail({
   products,
   locale,
   copy,
+  productCardCopy,
 }: {
   products: Product[];
   locale: Locale;
   copy: { index: string; label: string; title: string; subtitle: string; prevLabel: string; nextLabel: string };
+  productCardCopy: ProductCardCopy;
 }) {
   const railRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +83,7 @@ export function NewArrivalsRail({
       >
         {products.map((product, i) => (
           <div key={product.handle} className="w-[min(62vw,20rem)] shrink-0 snap-start last:snap-end">
-            <ProductCard product={product} locale={locale} index={i} />
+            <ProductCard product={product} locale={locale} index={i} copy={productCardCopy} />
           </div>
         ))}
       </div>

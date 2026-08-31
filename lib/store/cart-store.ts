@@ -53,7 +53,7 @@ interface CartState {
   /** Line id of the most recent addition, for the drawer's entrance animation. */
   lastAddedId: string | null;
 
-  add: (input: CartInput, quantity?: number) => void;
+  add: (input: CartInput, quantity?: number, surface?: 'pdp' | 'home' | 'collection') => void;
   remove: (lineId: string) => void;
   setQuantity: (lineId: string, quantity: number) => void;
   clear: () => void;
@@ -67,7 +67,7 @@ export const useCartStore = create<CartState>()(
       hydrated: false,
       lastAddedId: null,
 
-      add: (input, quantity = 1) => {
+      add: (input, quantity = 1, surface) => {
         const lineId = `${input.productId}:${input.variantId}`;
         const existing = get().lines.find((line) => line.lineId === lineId);
 
@@ -94,6 +94,7 @@ export const useCartStore = create<CartState>()(
             handle: input.handle,
             quantity,
             value: input.unitPrice.amount * quantity,
+            ...(surface ? { surface } : {}),
           },
         });
       },

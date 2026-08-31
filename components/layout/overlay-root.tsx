@@ -3,7 +3,9 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useOverlay } from '@/lib/store/ui-store';
+import type { SizeGuideCopy } from '@/components/product/size-guide-drawer';
 import type { Collection, Product } from '@/types/commerce';
+import type { Locale } from '@/types/i18n';
 
 /**
  * Mounts the overlays, lazily.
@@ -28,13 +30,23 @@ const SearchOverlay = dynamic(
 const MobileMenu = dynamic(() => import('@/components/layout/mobile-menu').then((m) => m.MobileMenu), {
   ssr: false,
 });
+const QuickAddSheet = dynamic(
+  () => import('@/components/commerce/quick-add-sheet').then((m) => m.QuickAddSheet),
+  { ssr: false },
+);
 
 export function OverlayRoot({
   products,
   collections,
+  locale,
+  sizeGuideCopy,
+  quickAddCopy,
 }: {
   products: Product[];
   collections: Collection[];
+  locale: Locale;
+  sizeGuideCopy: SizeGuideCopy;
+  quickAddCopy: { label: string };
 }) {
   const overlay = useOverlay();
   const [warm, setWarm] = useState(false);
@@ -81,6 +93,7 @@ export function OverlayRoot({
       <CartDrawer />
       <SearchOverlay products={products} collections={collections} />
       <MobileMenu />
+      <QuickAddSheet locale={locale} sizeGuideCopy={sizeGuideCopy} copy={quickAddCopy} />
     </>
   );
 }

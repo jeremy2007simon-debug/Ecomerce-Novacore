@@ -1,3 +1,4 @@
+import { formsForCategory } from '@/lib/commerce/product-form-groups';
 import { rankRecommendations } from '@/lib/commerce/recommendations';
 import { paginate, reviewsForHandle, summarise } from '@/lib/commerce/reviews';
 import type { Collection, Connection, Product, ProductSort } from '@/types/commerce';
@@ -70,12 +71,46 @@ function buildSearchQuery(query: ProductQuery): string | undefined {
   return clauses.length > 0 ? clauses.join(' AND ') : undefined;
 }
 
-/** Colorway availability has no Storefront query-string filter — applied client-side, same as the demo repository. */
-function filterByColorway(products: Product[], colorway: string | undefined): Product[] {
-  if (!colorway) return products;
-  return products.filter((p) =>
-    p.options.find((o) => o.name === 'color')?.values.some((v) => v.value === colorway && v.available),
-  );
+/**
+ * Colorway, size, category, price and availability have no Storefront
+ * query-string filter — applied client-side against the already-fetched
+ * page, same pattern already shipped for colorway. `category` reads the
+ * real `Product.form` field (see lib/commerce/product-form-groups.ts), same
+ * as the demo repository — never a fabricated grouping.
+ */
+function applyClientFilters(products: Product[], query: ProductQuery): Product[] {
+  let result = products;
+
+  if (query.colorway) {
+    result = result.filter((p) =>
+      p.options.find((o) => o.name === 'color')?.values.some((v) => v.value === query.colorway && v.available),
+    );
+  }
+
+  if (query.size) {
+    result = result.filter((p) =>
+      p.options.find((o) => o.name === 'size')?.values.some((v) => v.value === query.size && v.available),
+    );
+  }
+
+  if (query.category) {
+    const forms = formsForCategory(query.category);
+    result = result.filter((p) => forms.has(p.form));
+  }
+
+  if (query.priceMin !== undefined) {
+    result = result.filter((p) => p.priceRange.min.amount >= query.priceMin!);
+  }
+
+  if (query.priceMax !== undefined) {
+    result = result.filter((p) => p.priceRange.min.amount <= query.priceMax!);
+  }
+
+  if (query.availability === 'in-stock') {
+    result = result.filter((p) => p.availableForSale);
+  }
+
+  return result;
 }
 
 interface ProductsResponse {
@@ -151,9 +186,9 @@ export const shopifyRepository: CommerceRepository = {
         country,
       });
       const connection = data.collection?.products ?? { nodes: [], pageInfo: { hasNextPage: false, endCursor: null } };
-      const products = filterByColorway(
+      const products = applyClientFilters(
         connection.nodes.map((n) => normalizeProduct(n, ctx.locale)),
-        query.colorway,
+        query,
       );
       return { nodes: products, pageInfo: connection.pageInfo };
     }
@@ -167,9 +202,9 @@ export const shopifyRepository: CommerceRepository = {
       language,
       country,
     });
-    const products = filterByColorway(
+    const products = applyClientFilters(
       data.products.nodes.map((n) => normalizeProduct(n, ctx.locale)),
-      query.colorway,
+      query,
     );
     return { nodes: products, pageInfo: data.products.pageInfo };
   },

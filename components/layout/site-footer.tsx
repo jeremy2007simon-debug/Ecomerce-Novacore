@@ -3,6 +3,7 @@ import { AtlanticMonogram } from '@/components/visual/atlantic-mark';
 import { NewsletterForm } from './newsletter-form';
 import { LocaleSwitcher } from './locale-switcher';
 import { Rule } from '@/components/ui/rule';
+import { collectionHref } from '@/lib/commerce/collection-config';
 import { routes } from '@/lib/utils/routes';
 import type { Locale } from '@/types/i18n';
 
@@ -52,10 +53,10 @@ export function SiteFooter({
     {
       title: copy.shop,
       links: [
-        { label: copy.links.allProducts, href: routes.collection(locale) },
-        { label: copy.links.outerwear, href: routes.collectionFiltered(locale, 'collection=outerwear') },
-        { label: copy.links.essentials, href: routes.collectionFiltered(locale, 'collection=essentials') },
-        { label: copy.links.accessories, href: routes.collectionFiltered(locale, 'collection=accessories') },
+        { label: copy.links.allProducts, href: collectionHref(locale, 'all') },
+        { label: copy.links.outerwear, href: collectionHref(locale, 'outerwear') },
+        { label: copy.links.essentials, href: collectionHref(locale, 'essentials') },
+        { label: copy.links.accessories, href: collectionHref(locale, 'accessories') },
       ],
     },
     {

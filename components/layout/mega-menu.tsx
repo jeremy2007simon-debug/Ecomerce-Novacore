@@ -150,7 +150,17 @@ function MegaMenuColumnList({
 
   return (
     <div>
-      <p className="micro-label text-ink-subtle">{label(column.titleKey)}</p>
+      {column.titleHref ? (
+        <Link
+          href={column.titleHref}
+          onClick={onNavigate}
+          className="micro-label text-ink-subtle transition-colors hover:text-ink"
+        >
+          {label(column.titleKey)}
+        </Link>
+      ) : (
+        <p className="micro-label text-ink-subtle">{label(column.titleKey)}</p>
+      )}
       <ul className="mt-4 flex flex-col gap-3">
         {column.links.map((link) => (
           <li key={link.labelKey}>

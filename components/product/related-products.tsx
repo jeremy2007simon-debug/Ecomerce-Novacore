@@ -1,5 +1,5 @@
 import { Reveal, RevealGroup, RevealItem } from '@/components/motion';
-import { ProductCard } from '@/components/commerce/product-card';
+import { ProductCard, type ProductCardCopy } from '@/components/commerce/product-card';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import type { ScoredProduct } from '@/lib/commerce';
 import type { Locale } from '@/types/i18n';
@@ -20,10 +20,12 @@ export function RelatedProducts({
   recommendations,
   locale,
   copy,
+  productCardCopy,
 }: {
   recommendations: ScoredProduct[];
   locale: Locale;
   copy: { relatedTitle: string; relatedSubtitle: string };
+  productCardCopy: ProductCardCopy;
 }) {
   if (recommendations.length === 0) return null;
 
@@ -51,7 +53,7 @@ export function RelatedProducts({
       <RevealGroup className="grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-4">
         {recommendations.map((entry, i) => (
           <RevealItem key={entry.product.handle}>
-            <ProductCard product={entry.product} locale={locale} index={i} />
+            <ProductCard product={entry.product} locale={locale} index={i} copy={productCardCopy} />
           </RevealItem>
         ))}
       </RevealGroup>

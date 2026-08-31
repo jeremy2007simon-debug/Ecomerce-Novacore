@@ -1,5 +1,6 @@
 import { DEMO_COLLECTIONS } from '@/data/collections';
 import { DEMO_PRODUCTS } from '@/data/products';
+import { formsForCategory } from '@/lib/commerce/product-form-groups';
 import { rankRecommendations } from '@/lib/commerce/recommendations';
 import { paginate, reviewsForHandle, summarise } from '@/lib/commerce/reviews';
 import { searchIndex } from '@/lib/commerce/search';
@@ -110,6 +111,31 @@ export const demoRepository: CommerceRepository = {
           .find((o) => o.name === 'color')
           ?.values.some((v) => v.value === query.colorway && v.available),
       );
+    }
+
+    if (query.category) {
+      const forms = formsForCategory(query.category);
+      products = products.filter((p) => forms.has(p.form));
+    }
+
+    if (query.size) {
+      products = products.filter((p) =>
+        p.options
+          .find((o) => o.name === 'size')
+          ?.values.some((v) => v.value === query.size && v.available),
+      );
+    }
+
+    if (query.priceMin !== undefined) {
+      products = products.filter((p) => p.priceRange.min.amount >= query.priceMin!);
+    }
+
+    if (query.priceMax !== undefined) {
+      products = products.filter((p) => p.priceRange.min.amount <= query.priceMax!);
+    }
+
+    if (query.availability === 'in-stock') {
+      products = products.filter((p) => p.availableForSale);
     }
 
     return paginate(sortProducts(products, query.sort), query.first ?? 24, query.after);
