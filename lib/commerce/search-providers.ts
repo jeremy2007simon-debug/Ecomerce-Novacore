@@ -1,4 +1,6 @@
 import { DEMO_STORIES, type DemoStory } from '@/data/stories';
+
+export { DEMO_STORIES, type DemoStory };
 import { trendingStrategy } from '@/lib/commerce/recommendations';
 import type { Collection, Product } from '@/types/commerce';
 import type { Locale } from '@/types/i18n';

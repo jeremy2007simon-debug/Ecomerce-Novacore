@@ -43,7 +43,7 @@ export type AnalyticsEvent =
   | { name: 'wishlist_add'; payload: { productId: string; variantId: string; handle: string } }
   | { name: 'story_view'; payload: { storyId: string; handle: string } }
   | { name: 'size_guide_open'; payload: { productId: string; handle: string } }
-  | { name: 'newsletter_signup'; payload: { surface: 'footer' } };
+  | { name: 'newsletter_signup'; payload: { surface: 'footer' | 'home' } };
 
 export type AnalyticsEventName = AnalyticsEvent['name'];
 

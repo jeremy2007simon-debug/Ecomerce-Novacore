@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { AtlanticMonogram } from '@/components/visual/atlantic-mark';
 import { ContourField } from '@/components/visual/contour-field';
 import { GradientField } from '@/components/visual/gradient-field';
-import { IconArrowDown } from '@/components/visual/icons';
+import { IconArrowDown, IconArrowRight } from '@/components/visual/icons';
 import { routes } from '@/lib/utils/routes';
 import type { Locale } from '@/types/i18n';
 
@@ -36,6 +36,8 @@ export function Hero({
     titleBottom: string;
     subtitle: string;
     cta: string;
+    ctaSecondary: string;
+    collectionBadge: string;
     scrollHint: string;
   };
 }) {
@@ -70,7 +72,7 @@ export function Hero({
           >
             <span className="text-ember">{copy.eyebrow}</span>
             <span aria-hidden="true" className="h-px w-8 bg-hairline-strong" />
-            <span>{locale === 'es' ? 'Colección 2026' : 'Collection 2026'}</span>
+            <span>{copy.collectionBadge}</span>
           </p>
 
           {/*
@@ -105,15 +107,31 @@ export function Hero({
               {copy.subtitle}
             </p>
 
-            {/* CTA — discreet, as the brief asks. An outline rule, not a pill. */}
-            <Link
-              href={routes.anchor(locale, 'origin')}
-              className="atl-enter-rise group inline-flex shrink-0 items-center gap-4 self-start border-b border-hairline-strong pb-3 transition-colors duration-(--duration-fast) hover:border-ember focus-visible:border-ember sm:self-auto"
+            {/*
+              Two CTAs — discreet, as the brief asks: outline rules, not
+              pills. Primary keeps scrolling into the story (Origin); the
+              secondary is a direct commerce path, so the first screen never
+              makes a visitor choose between emotion and being able to shop.
+            */}
+            <div
+              className="atl-enter-rise flex shrink-0 items-center gap-6 self-start sm:self-auto"
               style={{ ['--atl-delay' as string]: '0.52s' }}
             >
-              <span className="label text-ink">{copy.cta}</span>
-              <IconArrowDown className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-y-1" />
-            </Link>
+              <Link
+                href={routes.anchor(locale, 'origin')}
+                className="group inline-flex items-center gap-4 border-b border-hairline-strong pb-3 transition-colors duration-(--duration-fast) hover:border-ember focus-visible:border-ember"
+              >
+                <span className="label text-ink">{copy.cta}</span>
+                <IconArrowDown className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-y-1" />
+              </Link>
+              <Link
+                href={routes.collection(locale)}
+                className="group inline-flex items-center gap-4 border-b border-hairline-strong pb-3 text-ink-muted transition-colors duration-(--duration-fast) hover:border-ember hover:text-ink focus-visible:border-ember"
+              >
+                <span className="label">{copy.ctaSecondary}</span>
+                <IconArrowRight className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-x-1" />
+              </Link>
+            </div>
           </div>
 
           {/* Scroll hint: a travelling tick in a hairline track. */}

@@ -1,18 +1,21 @@
 import Link from 'next/link';
-import { ScrollScene, StickyStage, SceneLayer } from '@/components/motion';
+import { ScrollScene, StickyStage, SceneLayer, RevealText } from '@/components/motion';
 import { ProductVisual } from '@/components/visual/product-visual';
+import { Price } from '@/components/commerce/price';
+import { QuickAdd } from '@/components/commerce/quick-add';
 import { IconArrowRight } from '@/components/visual/icons';
 import { Eyebrow } from '@/components/ui/eyebrow';
-import { formatMoney } from '@/lib/utils/money';
 import { routes } from '@/lib/utils/routes';
+import type { SizeGuideCopy } from '@/components/product/size-guide-drawer';
 import type { Product } from '@/types/commerce';
 import type { Locale } from '@/types/i18n';
 
 /**
- * SCENE 02 — PRODUCT REVEAL.
+ * SCENE 02 — DROP.
  *
  * The product starts small and distant and grows as the scene scrolls, while
- * three feature callouts hand off to one another around it.
+ * three feature callouts hand off to one another around it. A single-product
+ * "launch" moment — today it's always Atlantic 01, passed in by the caller.
  *
  * The VISUAL scales; the type never does. iOS rasterises text at its pre-scale
  * size, so animating scale on a headline makes it go blurry and then repaint —
@@ -22,14 +25,23 @@ import type { Locale } from '@/types/i18n';
  * fades in) rather than cutting, which is what makes the sequence feel like one
  * continuous move instead of three separate animations.
  */
-export function SceneReveal({
+export function SceneDrop({
   product,
   locale,
   copy,
+  sizeGuideCopy,
 }: {
   product: Product;
   locale: Locale;
-  copy: { index: string; label: string; title: string; subtitle: string; cta: string };
+  copy: {
+    index: string;
+    label: string;
+    title: string;
+    subtitle: string;
+    cta: string;
+    quickAdd: { cta: string; label: string };
+  };
+  sizeGuideCopy: SizeGuideCopy;
 }) {
   const features = product.metafields.features.slice(0, 3);
   const hero = product.media[0];
@@ -65,7 +77,21 @@ export function SceneReveal({
               to={{ opacity: [0, 0.14], y: [40, 0] }}
               className="pointer-events-none absolute inset-x-0 -z-10 flex justify-center"
             >
-              <p className="text-display whitespace-nowrap font-medium text-ink">{copy.title}</p>
+              {/*
+                A real h2, not a decorative <p> — this is the section's only
+                heading, so screen-reader section navigation should announce
+                it. `driver="css"` rather than `"scene"`: this text's
+                opacity/y are already driven by the SceneLayer wrapping it, so
+                a second, independent scroll-linked reveal here would animate
+                the same properties twice. The css driver settles near-
+                instantly on mount (long before scroll reaches this far down
+                the page), so in practice it contributes nothing but the
+                correct heading semantics — the SceneLayer above remains the
+                only visible motion.
+              */}
+              <RevealText as="h2" driver="css" split="none" className="text-display whitespace-nowrap font-medium text-ink">
+                {copy.title}
+              </RevealText>
             </SceneLayer>
           </div>
 
@@ -103,18 +129,19 @@ export function SceneReveal({
             to={{ opacity: [0, 1], y: [16, 0] }}
             className="absolute inset-x-[var(--spacing-gutter)] bottom-[max(1.25rem,env(safe-area-inset-bottom))]"
           >
-            <div className="rule-t flex items-center justify-between pt-4">
+            <div className="rule-t flex flex-wrap items-center justify-between gap-4 pt-4">
               <p className="label text-ink-subtle">{copy.subtitle}</p>
-              <Link
-                href={routes.product(locale, product.handle)}
-                className="group inline-flex items-center gap-3"
-              >
-                <span className="label text-ink">{copy.cta}</span>
-                <span className="label text-ember" data-numeric>
-                  {formatMoney(product.priceRange.min, locale)}
-                </span>
-                <IconArrowRight className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-x-1" />
-              </Link>
+              <div className="flex flex-wrap items-center gap-6">
+                <Link
+                  href={routes.product(locale, product.handle)}
+                  className="group inline-flex items-center gap-3"
+                >
+                  <span className="label text-ink">{copy.cta}</span>
+                  <Price value={product.priceRange.min} locale={locale} size="label" className="text-ember" />
+                  <IconArrowRight className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-x-1" />
+                </Link>
+                <QuickAdd product={product} locale={locale} sizeGuideCopy={sizeGuideCopy} copy={copy.quickAdd} />
+              </div>
             </div>
           </SceneLayer>
         </div>

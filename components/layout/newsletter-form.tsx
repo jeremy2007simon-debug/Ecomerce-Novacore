@@ -20,8 +20,11 @@ type Status = 'idle' | 'loading' | 'success' | 'error';
  */
 export function NewsletterForm({
   copy,
+  surface = 'footer',
 }: {
   copy: { placeholder: string; cta: string; demo: string; infoLabel: string; loading: string };
+  /** Where this instance is mounted, for accurate signup attribution — see track() below. */
+  surface?: 'footer' | 'home';
 }) {
   const { t } = useLocale();
   const id = useId();
@@ -43,7 +46,7 @@ export function NewsletterForm({
           setStatus('loading');
           window.setTimeout(() => {
             setStatus('success');
-            track({ name: 'newsletter_signup', payload: { surface: 'footer' } });
+            track({ name: 'newsletter_signup', payload: { surface } });
           }, 500);
         }}
         className="mt-7 flex items-center gap-3 border-b border-hairline-strong pb-3"
