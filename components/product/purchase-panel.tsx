@@ -33,6 +33,7 @@ export function PurchasePanel({
   showVisual = false,
   className,
   sizeGuideCopy,
+  surface = 'pdp',
 }: {
   product: Product;
   locale: 'es' | 'en';
@@ -40,6 +41,8 @@ export function PurchasePanel({
   className?: string;
   /** The `pages.sizeGuide` server-dictionary block, threaded down for the drawer. */
   sizeGuideCopy: SizeGuideCopy;
+  /** Where this panel lives, for add_to_cart attribution — see AddToBag. */
+  surface?: 'pdp' | 'home' | 'collection';
 }) {
   const { t, fmt } = useLocale();
 
@@ -271,6 +274,7 @@ export function PurchasePanel({
         input={cartInput}
         disabled={soldOut}
         disabledLabel={soldOut ? t.product.soldOut : t.product.selectSizeFirst}
+        surface={surface}
       />
 
       <p className="micro-label mt-6 flex items-center justify-center gap-2 text-ink-subtle">

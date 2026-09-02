@@ -87,7 +87,17 @@ export function MobileMenu() {
             <div className="flex flex-col gap-5 pb-3 pt-3">
               {shopSections.map((section) => (
                 <div key={section.id}>
-                  <p className="micro-label text-ink-subtle">{label(section.titleKey)}</p>
+                  {section.titleHref ? (
+                    <Link
+                      href={section.titleHref}
+                      onClick={close}
+                      className="micro-label text-ink-subtle transition-colors hover:text-ink"
+                    >
+                      {label(section.titleKey)}
+                    </Link>
+                  ) : (
+                    <p className="micro-label text-ink-subtle">{label(section.titleKey)}</p>
+                  )}
                   <ul className="mt-2 flex flex-col gap-2.5">
                     {section.links.map((link) =>
                       link.disabled || !link.href ? (
