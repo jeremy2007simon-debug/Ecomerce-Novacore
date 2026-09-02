@@ -2,11 +2,10 @@ import Link from 'next/link';
 import { ScrollScene, StickyStage, SceneLayer, RevealText } from '@/components/motion';
 import { ProductVisual } from '@/components/visual/product-visual';
 import { Price } from '@/components/commerce/price';
-import { QuickAdd } from '@/components/commerce/quick-add';
+import { QuickAddTrigger } from '@/components/commerce/quick-add-trigger';
 import { IconArrowRight } from '@/components/visual/icons';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { routes } from '@/lib/utils/routes';
-import type { SizeGuideCopy } from '@/components/product/size-guide-drawer';
 import type { Product } from '@/types/commerce';
 import type { Locale } from '@/types/i18n';
 
@@ -29,7 +28,7 @@ export function SceneDrop({
   product,
   locale,
   copy,
-  sizeGuideCopy,
+  quickAddCta,
 }: {
   product: Product;
   locale: Locale;
@@ -39,9 +38,8 @@ export function SceneDrop({
     title: string;
     subtitle: string;
     cta: string;
-    quickAdd: { cta: string; label: string };
   };
-  sizeGuideCopy: SizeGuideCopy;
+  quickAddCta: string;
 }) {
   const features = product.metafields.features.slice(0, 3);
   const hero = product.media[0];
@@ -140,7 +138,12 @@ export function SceneDrop({
                   <Price value={product.priceRange.min} locale={locale} size="label" className="text-ember" />
                   <IconArrowRight className="size-4 text-ember transition-transform duration-(--duration-base) ease-(--ease-out-expo) group-hover:translate-x-1" />
                 </Link>
-                <QuickAdd product={product} locale={locale} sizeGuideCopy={sizeGuideCopy} copy={copy.quickAdd} />
+                <QuickAddTrigger
+                  product={product}
+                  surface="home"
+                  label={quickAddCta}
+                  className="label border-b border-hairline-strong pb-0.5 text-ink transition-colors duration-(--duration-fast) hover:border-ember hover:text-ember"
+                />
               </div>
             </div>
           </SceneLayer>

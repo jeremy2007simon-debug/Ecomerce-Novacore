@@ -10,6 +10,7 @@ import { ProductVisual } from '@/components/visual/product-visual';
 import { IconClose, IconSearch } from '@/components/visual/icons';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { useIsOverlayOpen, useUIStore } from '@/lib/store/ui-store';
+import { collectionHref, isCollectionKey } from '@/lib/commerce/collection-config';
 import {
   POPULAR_SEARCHES,
   searchCollections,
@@ -116,7 +117,9 @@ function SearchPanel({
         kind: 'collection',
         key: `collection-${hit.collection.handle}`,
         hit,
-        href: routes.collectionFiltered(locale, `collection=${hit.collection.handle}`),
+        href: isCollectionKey(hit.collection.handle)
+          ? collectionHref(locale, hit.collection.handle)
+          : routes.collectionFiltered(locale, `collection=${hit.collection.handle}`),
       })),
       ...storyHits.map((hit): ResultEntry => ({
         kind: 'story',

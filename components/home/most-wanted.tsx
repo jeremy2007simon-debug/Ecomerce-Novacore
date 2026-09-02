@@ -1,5 +1,5 @@
 import { Reveal, RevealGroup, RevealItem, RevealText } from '@/components/motion';
-import { ProductCard } from '@/components/commerce/product-card';
+import { ProductCard, type ProductCardCopy } from '@/components/commerce/product-card';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import type { Product } from '@/types/commerce';
 import type { Locale } from '@/types/i18n';
@@ -19,10 +19,12 @@ export function MostWanted({
   curatedProducts,
   locale,
   copy,
+  productCardCopy,
 }: {
   curatedProducts: Product[];
   locale: Locale;
   copy: { index: string; label: string; title: string; subtitle: string };
+  productCardCopy: ProductCardCopy;
 }) {
   if (curatedProducts.length === 0) return null;
 
@@ -43,7 +45,7 @@ export function MostWanted({
       <RevealGroup className="grid grid-cols-2 gap-x-4 gap-y-14 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
         {curatedProducts.map((product, i) => (
           <RevealItem key={product.handle}>
-            <ProductCard product={product} locale={locale} index={i} />
+            <ProductCard product={product} locale={locale} index={i} copy={productCardCopy} />
           </RevealItem>
         ))}
       </RevealGroup>
