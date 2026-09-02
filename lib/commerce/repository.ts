@@ -10,7 +10,7 @@ import type { CurrencyCode } from '@/types/commerce';
 import type { Locale } from '@/types/i18n';
 
 /**
- * ─────────────────────────────────────────────────────────────────────────────
+ * ───────────────────────────────────────────────────────────────────────
  * THE COMMERCE SEAM
  *
  * Every page reads product data through this interface and nothing else. The
@@ -26,7 +26,7 @@ import type { Locale } from '@/types/i18n';
  *
  * Because of that symmetry the adapter swap is a configuration change, not a
  * refactor. See lib/commerce/index.ts.
- * ─────────────────────────────────────────────────────────────────────────────
+ * ───────────────────────────────────────────────────────────────────────
  */
 
 export interface RequestContext {
@@ -38,6 +38,23 @@ export interface ProductQuery {
   collection?: string;
   tags?: string[];
   colorway?: string;
+  /** Product size, matched against any variant's real size option value. */
+  size?: string;
+  /** Minor currency units — same convention as Money.amount. */
+  priceMin?: number;
+  priceMax?: number;
+  /**
+   * At least one variant purchasable — the same rollup already exposed as
+   * `Product.availableForSale`.
+   */
+  availability?: 'in-stock';
+  /**
+   * A super-category grouping derived from the real `Product.form` field
+   * (apparel = shell/overshirt/tee/knit/pant, accessories =
+   * bag/cap/bottle) — for collections that have no single matching
+   * provider handle. See lib/commerce/collection-config.ts.
+   */
+  category?: 'apparel' | 'accessories';
   sort?: ProductSort;
   first?: number;
   after?: string | null;

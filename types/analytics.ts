@@ -19,6 +19,8 @@ export type AnalyticsEvent =
         handle: string;
         quantity: number;
         value: number;
+        /** Where the add happened — omitted defaults to the PDP's own buy box. */
+        surface?: 'pdp' | 'home' | 'collection';
       };
     }
   | {

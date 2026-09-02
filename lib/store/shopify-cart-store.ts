@@ -18,7 +18,7 @@ import type { Money } from '@/types/commerce';
 import type { ProductMedia } from '@/types/visual';
 
 /**
- * ─────────────────────────────────────────────────────────────────────────────
+ * ───────────────────────────────────────────────────────────────────────
  * SHOPIFY CART — server-authoritative, mounted only when COMMERCE_PROVIDER=shopify.
  *
  * Deliberately a separate store from lib/store/cart-store.ts, not a shared
@@ -32,7 +32,7 @@ import type { ProductMedia } from '@/types/visual';
  * always re-fetched from Shopify on hydration (see ShopifyCartHydrator),
  * since those are never trusted from a stale local copy the way the demo
  * cart's lines are.
- * ─────────────────────────────────────────────────────────────────────────────
+ * ───────────────────────────────────────────────────────────────────────
  */
 
 export interface ShopifyCartLine {
@@ -93,7 +93,13 @@ interface ShopifyCartState {
   error: string | null;
   hydrated: boolean;
 
-  add: (variantId: string, quantity: number, locale: Locale, displayHandle: string) => Promise<void>;
+  add: (
+    variantId: string,
+    quantity: number,
+    locale: Locale,
+    displayHandle: string,
+    surface?: 'pdp' | 'home' | 'collection',
+  ) => Promise<void>;
   updateQuantity: (lineId: string, quantity: number, locale: Locale) => Promise<void>;
   remove: (lineId: string, locale: Locale) => Promise<void>;
   hydrate: (locale: Locale) => Promise<void>;
@@ -113,7 +119,7 @@ export const useShopifyCartStore = create<ShopifyCartState>()(
       error: null,
       hydrated: false,
 
-      add: async (variantId, quantity, locale, displayHandle) => {
+      add: async (variantId, quantity, locale, displayHandle, surface) => {
         set({ status: 'loading', error: null });
         const { cartId } = get();
 
@@ -133,7 +139,14 @@ export const useShopifyCartStore = create<ShopifyCartState>()(
         set({ ...applyCart(result.cart), status: 'idle', error: null });
         track({
           name: 'add_to_cart',
-          payload: { productId: displayHandle, variantId, handle: displayHandle, quantity, value: 0 },
+          payload: {
+            productId: displayHandle,
+            variantId,
+            handle: displayHandle,
+            quantity,
+            value: 0,
+            ...(surface ? { surface } : {}),
+          },
         });
       },
 

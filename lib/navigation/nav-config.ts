@@ -1,4 +1,5 @@
 import type { Route } from 'next';
+import { collectionHref } from '@/lib/commerce/collection-config';
 import { routes } from '@/lib/utils/routes';
 import type { Locale } from '@/types/i18n';
 
@@ -27,6 +28,8 @@ export interface NavLink {
 export interface MegaMenuColumn {
   id: 'apparel' | 'accessories' | 'discover';
   titleKey: string;
+  /** Present for apparel/accessories — the column title links to the real, filtered collection. */
+  titleHref?: Route;
   links: NavLink[];
 }
 
@@ -49,19 +52,25 @@ export function buildMegaMenuFeatured(locale: Locale): MegaMenuFeatured {
 }
 
 /**
- * Apparel/accessories sub-links point straight at the one real product each
- * name maps to — there is no per-category collection filter today (that is
- * a later phase), so linking to an imprecise existing `?collection=` filter
- * would group unrelated forms under the wrong label. The catalogue has 5
- * apparel forms; only 3 (Jackets/Overshirts/T-Shirts) came from the original
- * brief — Knitwear and Trousers are added so the other 2 real products are
- * not hidden from navigation.
+ * Apparel/accessories column titles link to the real, filtered collection
+ * routes (`?collection=apparel`/`?collection=accessories`, resolved via
+ * collection-config.ts) — Phase 4 added a genuine `category` filter, so this
+ * no longer needs the "provisional" workaround Phase 2 documented here.
+ *
+ * The sub-links still point straight at one real product each, because no
+ * per-sub-category filter exists (only the coarse apparel/accessories split
+ * does) — that remains an honest, useful shortcut alongside the collection
+ * link, not a limitation. The catalogue has 5 apparel forms; only 3
+ * (Jackets/Overshirts/T-Shirts) came from the original brief — Knitwear and
+ * Trousers are added so the other 2 real products are not hidden from
+ * navigation.
  */
 export function buildMegaMenuSections(locale: Locale): MegaMenuColumn[] {
   return [
     {
       id: 'apparel',
       titleKey: 'apparelTitle',
+      titleHref: collectionHref(locale, 'apparel'),
       links: [
         { href: routes.product(locale, 'atlantic-01'), labelKey: 'jackets' },
         { href: routes.product(locale, 'tide-01'), labelKey: 'overshirts' },
@@ -73,6 +82,7 @@ export function buildMegaMenuSections(locale: Locale): MegaMenuColumn[] {
     {
       id: 'accessories',
       titleKey: 'accessoriesTitle',
+      titleHref: collectionHref(locale, 'accessories'),
       links: [
         { href: routes.product(locale, 'current-bag'), labelKey: 'bags' },
         { href: routes.product(locale, 'north-cap'), labelKey: 'headwear' },

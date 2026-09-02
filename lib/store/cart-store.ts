@@ -8,7 +8,7 @@ import type { Money } from '@/types/commerce';
 import type { ProductMedia } from '@/types/visual';
 
 /**
- * ─────────────────────────────────────────────────────────────────────────────
+ * ───────────────────────────────────────────────────────────────────────
  * CART
  *
  * A module-scope store, deliberately. Two consequences that both matter:
@@ -21,7 +21,7 @@ import type { ProductMedia } from '@/types/visual';
  *     [locale] segment, which remounts the root layout and destroys anything
  *     held in React context. Module state is untouched, so a visitor with three
  *     items in the bag keeps them when they change language mid-flow.
- * ─────────────────────────────────────────────────────────────────────────────
+ * ───────────────────────────────────────────────────────────────────────
  */
 
 export interface CartLine {
@@ -53,7 +53,7 @@ interface CartState {
   /** Line id of the most recent addition, for the drawer's entrance animation. */
   lastAddedId: string | null;
 
-  add: (input: CartInput, quantity?: number) => void;
+  add: (input: CartInput, quantity?: number, surface?: 'pdp' | 'home' | 'collection') => void;
   remove: (lineId: string) => void;
   setQuantity: (lineId: string, quantity: number) => void;
   clear: () => void;
@@ -67,7 +67,7 @@ export const useCartStore = create<CartState>()(
       hydrated: false,
       lastAddedId: null,
 
-      add: (input, quantity = 1) => {
+      add: (input, quantity = 1, surface) => {
         const lineId = `${input.productId}:${input.variantId}`;
         const existing = get().lines.find((line) => line.lineId === lineId);
 
@@ -94,6 +94,7 @@ export const useCartStore = create<CartState>()(
             handle: input.handle,
             quantity,
             value: input.unitPrice.amount * quantity,
+            ...(surface ? { surface } : {}),
           },
         });
       },
@@ -157,7 +158,7 @@ export const useCartStore = create<CartState>()(
   ),
 );
 
-/* ── Selectors ──────────────────────────────────────────────────────────────
+/* ── Selectors ───────────────────────────────────────────────────────────────────────
    All of these return the empty-cart value until `hydrated` flips, so nothing
    derived from persisted state can differ between the server HTML and the
    first client paint. */
