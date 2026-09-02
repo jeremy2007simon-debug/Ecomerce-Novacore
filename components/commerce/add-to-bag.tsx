@@ -32,6 +32,7 @@ export function AddToBag({
   size = 'lg',
   block = true,
   openDrawer = true,
+  surface = 'pdp',
   className,
 }: {
   input: CartInput | null;
@@ -40,6 +41,8 @@ export function AddToBag({
   size?: 'md' | 'lg';
   block?: boolean;
   openDrawer?: boolean;
+  /** Where this button lives, for add_to_cart attribution. */
+  surface?: 'pdp' | 'home' | 'collection';
   className?: string;
 }) {
   const { t, locale } = useLocale();
@@ -55,12 +58,12 @@ export function AddToBag({
     if (!input) return;
 
     if (isDemoMode) {
-      add(input, 1);
+      add(input, 1, surface);
     } else {
       // Genuinely async — a real cartCreate/cartLinesAdd round trip, not a
       // simulated delay. The drawer still opens immediately; its line
       // renders once the mutation resolves.
-      void shopifyAdd(input.variantId, 1, locale, input.handle);
+      void shopifyAdd(input.variantId, 1, locale, input.handle, surface);
     }
 
     setAdded(true);

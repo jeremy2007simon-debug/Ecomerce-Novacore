@@ -133,7 +133,13 @@ export default async function RootLayout({
                 <SiteFooter locale={typedLocale} copy={t.footer} />
               </div>
 
-              <OverlayRoot products={catalogue.nodes} collections={collections} />
+              <OverlayRoot
+                products={catalogue.nodes}
+                collections={collections}
+                locale={typedLocale}
+                sizeGuideCopy={t.pages.sizeGuide}
+                quickAddCopy={clientDictionary.quickAdd}
+              />
             </MotionProvider>
           </LocaleProvider>
 

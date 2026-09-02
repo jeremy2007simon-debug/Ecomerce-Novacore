@@ -12,9 +12,10 @@ import { AtlanticEdit } from '@/components/home/atlantic-edit';
 import { StoriesPreview } from '@/components/home/stories-preview';
 import { FieldNotes } from '@/components/home/field-notes';
 import { commerce } from '@/lib/commerce';
+import { collectionHref } from '@/lib/commerce/collection-config';
 import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
+import { buildProductCardCopy } from '@/lib/i18n/product-card-copy';
 import { DEMO_STORIES } from '@/lib/commerce/search-providers';
-import { routes } from '@/lib/utils/routes';
 import { isLocale } from '@/types/i18n';
 
 /**
@@ -69,6 +70,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   // in New Arrivals or Most Wanted.
   const newArrivals = newArrivalsRaw.nodes.filter((p) => p.handle !== dropProduct?.handle).slice(0, 6);
   const curatedProducts = curatedRaw.nodes.filter((p) => p.handle !== dropProduct?.handle).slice(0, 4);
+  const productCardCopy = buildProductCardCopy(t, clientT);
 
   return (
     <main id="main">
@@ -76,14 +78,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <SceneOrigin copy={t.home.origin} />
 
       {dropProduct ? (
-        <SceneDrop product={dropProduct} locale={locale} copy={t.home.drop} sizeGuideCopy={t.pages.sizeGuide} />
+        <SceneDrop product={dropProduct} locale={locale} copy={t.home.drop} quickAddCta={clientT.quickAdd.cta} />
       ) : null}
 
       {dropProduct && accessoryProduct ? (
         <CategoryDiscovery
-          apparelHref={routes.collection(locale)}
+          apparelHref={collectionHref(locale, 'apparel')}
           apparelProduct={dropProduct}
-          accessoriesHref={routes.collectionFiltered(locale, 'collection=accessories')}
+          accessoriesHref={collectionHref(locale, 'accessories')}
           accessoriesProduct={accessoryProduct}
           copy={t.home.categoryDiscovery}
         />
@@ -91,27 +93,37 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       <SceneMaterial copy={t.home.material} />
 
-      <NewArrivalsRail products={newArrivals} locale={locale} copy={t.home.newArrivals} />
+      <NewArrivalsRail
+        products={newArrivals}
+        locale={locale}
+        copy={t.home.newArrivals}
+        productCardCopy={productCardCopy}
+      />
 
-      <MostWanted curatedProducts={curatedProducts} locale={locale} copy={t.home.mostWanted} />
+      <MostWanted
+        curatedProducts={curatedProducts}
+        locale={locale}
+        copy={t.home.mostWanted}
+        productCardCopy={productCardCopy}
+      />
 
       {dropProduct && cityProduct && movementProduct ? (
         <AtlanticEdit
           editions={[
             {
-              href: routes.collectionFiltered(locale, 'collection=outerwear'),
+              href: collectionHref(locale, 'outerwear'),
               product: dropProduct,
               title: t.home.atlanticEdit.coast.title,
               cta: t.home.atlanticEdit.coast.cta,
             },
             {
-              href: routes.collectionFiltered(locale, 'collection=essentials'),
+              href: collectionHref(locale, 'essentials'),
               product: cityProduct,
               title: t.home.atlanticEdit.city.title,
               cta: t.home.atlanticEdit.city.cta,
             },
             {
-              href: routes.collectionFiltered(locale, 'collection=technical'),
+              href: collectionHref(locale, 'technical'),
               product: movementProduct,
               title: t.home.atlanticEdit.movement.title,
               cta: t.home.atlanticEdit.movement.cta,

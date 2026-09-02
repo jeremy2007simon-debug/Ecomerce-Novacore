@@ -19,7 +19,8 @@ import { Rule } from '@/components/ui/rule';
 import { MaterialMacro } from '@/components/visual/material-macro';
 import { ProductVisual } from '@/components/visual/product-visual';
 import { commerce } from '@/lib/commerce';
-import { getServerDictionary } from '@/lib/i18n/get-dictionary';
+import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
+import { buildProductCardCopy } from '@/lib/i18n/product-card-copy';
 import { breadcrumbJsonLd, productJsonLd } from '@/lib/seo/json-ld';
 import { routes } from '@/lib/utils/routes';
 import { isLocale, LOCALES } from '@/types/i18n';
@@ -97,12 +98,14 @@ export default async function ProductPage({
   const product = await commerce.getProduct(handle, { locale });
   if (!product) notFound();
 
-  const [t, reviews, recommendations, catalogue] = await Promise.all([
+  const [t, clientT, reviews, recommendations, catalogue] = await Promise.all([
     getServerDictionary(locale),
+    getClientDictionary(locale),
     commerce.getReviews(handle, { first: 12, sort: 'recent' }, { locale }),
     commerce.getRecommendations(handle, { intent: 'related', limit: 4 }, { locale }),
     commerce.getProducts({ collection: 'all', first: 50 }, { locale }),
   ]);
+  const productCardCopy = buildProductCardCopy(t, clientT);
 
   const hero = product.media[0]!;
   const galleryMedia = product.media.slice(1);
@@ -136,7 +139,7 @@ export default async function ProductPage({
         }}
       />
 
-      {/* ── OPENING: the product, large, with the essentials ─────────────── */}
+      {/* ── OPENING: the product, large, with the essentials ───────────────── */}
       <section className="editorial grid gap-12 pt-28 pb-(--spacing-section) lg:grid-cols-2 lg:gap-20 lg:pt-36">
         {/*
           `top-20` matches the 64px header plus a little air, and agrees with the
@@ -217,10 +220,10 @@ export default async function ProductPage({
         label={t.product.details}
       />
 
-      {/* ── GALLERY ──────────────────────────────────────────────────────── */}
+      {/* ── GALLERY ──────────────────────────────────────────────────── */}
       <EditorialGallery media={galleryMedia} label={t.product.gallery} />
 
-      {/* ── MATERIAL ─────────────────────────────────────────────────────── */}
+      {/* ── MATERIAL ──────────────────────────────────────────────────── */}
       <section className="relative isolate overflow-clip border-y border-hairline py-(--spacing-section)">
         <MaterialMacro
           seed={`${product.handle}-macro`}
@@ -240,7 +243,7 @@ export default async function ProductPage({
         </div>
       </section>
 
-      {/* ── DETAILS ──────────────────────────────────────────────────────── */}
+      {/* ── DETAILS ──────────────────────────────────────────────────── */}
       <section className="editorial py-(--spacing-section)">
         <div className="grid gap-14 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
           <div>
@@ -251,7 +254,7 @@ export default async function ProductPage({
         </div>
       </section>
 
-      {/* ── REVIEWS ──────────────────────────────────────────────────────── */}
+      {/* ── REVIEWS ──────────────────────────────────────────────────── */}
       {/*
         No `content-visibility: auto` here, unlike the other heavy sections.
 
@@ -281,10 +284,15 @@ export default async function ProductPage({
         </div>
       </section>
 
-      {/* ── RECOMMENDATIONS ──────────────────────────────────────────────── */}
-      <RelatedProducts recommendations={recommendations} locale={locale} copy={t.product} />
+      {/* ── RECOMMENDATIONS ──────────────────────────────────────────── */}
+      <RelatedProducts
+        recommendations={recommendations}
+        locale={locale}
+        copy={t.product}
+        productCardCopy={productCardCopy}
+      />
 
-      {/* ── ASK ATLANTIC ─────────────────────────────────────────────────── */}
+      {/* ── ASK ATLANTIC ──────────────────────────────────────────────── */}
       <AskAtlantic
         product={product}
         catalogue={catalogue.nodes.map((item) => ({ handle: item.handle, title: item.title }))}
