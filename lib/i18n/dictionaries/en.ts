@@ -58,10 +58,6 @@ export const en = {
         title: 'ATLANTIC 01',
         subtitle: 'Three layers. 340 grams. Eight hours of Atlantic rain.',
         cta: 'Discover product',
-        quickAdd: {
-          cta: 'Add to bag',
-          label: 'Quick add — Atlantic 01',
-        },
       },
       categoryDiscovery: {
         index: '03',
@@ -133,16 +129,60 @@ export const en = {
         rating: 'Best rated',
         newest: 'Newest',
       },
+      filter: 'Filter',
+      filterSize: 'Size',
       filterColor: 'Colour',
+      filterPrice: 'Price',
+      priceMinPlaceholder: 'Min',
+      priceMaxPlaceholder: 'Max',
       filterAll: 'All',
       clearFilters: 'Clear filters',
-      emptyTitle: 'Nothing matches those filters',
+      showProducts: 'Show {count} products',
+      close: 'Close',
+      viewLabel: 'View products in {count} columns',
+      emptyTitle: 'No products match your filters',
       emptyBody: 'Try removing a filter, or view the full collection.',
       emptyCta: 'View everything',
+      emptyCollectionTitle: 'Nothing here yet',
+      emptyCollectionBody: 'This collection has no products right now.',
+    },
+    collections: {
+      apparel: {
+        eyebrow: 'Apparel',
+        title: 'Apparel',
+        tagline: 'Technical layers for changing conditions.',
+      },
+      outerwear: {
+        eyebrow: 'Outerwear',
+        title: 'Outerwear',
+        tagline: 'Shells and layers built for weather, not just cold.',
+      },
+      essentials: {
+        eyebrow: 'Essentials',
+        title: 'Essentials',
+        tagline: 'The pieces worn most, engineered to be worn hardest.',
+      },
+      knitwear: {
+        eyebrow: 'Knitwear',
+        title: 'Knitwear',
+        tagline: 'Merino built for temperature, not just texture.',
+      },
+      technical: {
+        eyebrow: 'Technical',
+        title: 'Technical',
+        tagline: 'Engineered for movement across the four climates of the island.',
+      },
+      accessories: {
+        eyebrow: 'Accessories',
+        title: 'Accessories',
+        tagline: 'The objects that carry, cap and hold — built the same way as everything else.',
+      },
     },
     product: {
       addToBag: 'Add to bag',
       soldOut: 'Sold out',
+      sale: 'Sale',
+      colorOptions: 'Colours',
       sizeGuide: 'Size guide',
       lowStock: 'Only {count} left',
       inStock: 'In stock',
@@ -219,7 +259,7 @@ export const en = {
         notes: [
           'Orders placed before 14:00 CET on a working day leave the same day.',
           'Tracking reaches you by email as soon as the parcel is collected, not when the label is created.',
-          'Customs duties outside the EU are the recipient\u2019s responsibility. We do not ship to addresses we cannot deliver to twice.',
+          'Customs duties outside the EU are the recipient’s responsibility. We do not ship to addresses we cannot deliver to twice.',
         ],
       },
       returns: {
@@ -313,7 +353,7 @@ export const en = {
         demo: 'This site has no back end. Nothing you type on it leaves your browser.',
         sections: [
           { title: 'What is collected', body: 'Nothing is sent to a server. There is no account system, no email list and no analytics account behind the counters shown in the demo dashboard, whose figures are generated locally.' },
-          { title: 'What is stored', body: 'Your bag, your language choice and whether you have dismissed the demo notice are kept in your own browser\u2019s storage. Clearing site data removes all of it, permanently and immediately.' },
+          { title: 'What is stored', body: 'Your bag, your language choice and whether you have dismissed the demo notice are kept in your own browser’s storage. Clearing site data removes all of it, permanently and immediately.' },
           { title: 'Cookies', body: 'A single cookie records the language you chose so the site does not ask again. It carries no identifier and is not read by anyone else.' },
           { title: 'Forms', body: 'The newsletter and contact forms are inert. Submitting them does not transmit an address, and no address is ever written down.' },
           { title: 'Third parties', body: 'The site is served as static files. There are no trackers, no advertising pixels and no embedded third-party scripts.' },
@@ -428,6 +468,10 @@ export const en = {
       body: 'The link may be old, or the page may have been retired.',
       cta: 'Back to the collection',
       home: 'Return home',
+    },
+    quickAdd: {
+      cta: 'Add to bag',
+      label: 'Quick add',
     },
     cart: {
       title: 'Your bag',
@@ -568,6 +612,10 @@ export const en = {
       title: 'Something broke',
       body: 'An unexpected error stopped this section from rendering. The rest of the store is unaffected.',
       retry: 'Try again',
+    },
+    collectionError: {
+      title: 'We couldn’t load the collection',
+      body: 'Something went wrong on our end. The rest of the store is unaffected.',
     },
     common: {
       close: 'Close',
