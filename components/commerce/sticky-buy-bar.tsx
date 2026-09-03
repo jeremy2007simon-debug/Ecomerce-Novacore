@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AddToBag } from '@/components/commerce/add-to-bag';
 import { useLocale } from '@/lib/i18n/locale-provider';
 import { usePDPStore } from '@/lib/store/pdp-store';
+import { useOverlay } from '@/lib/store/ui-store';
 import { formatMoney } from '@/lib/utils/money';
 import type { Product } from '@/types/commerce';
 
@@ -39,7 +40,13 @@ export function StickyBuyBar({
   // Read-only: `PurchasePanel` owns the selection and publishes it here.
   const input = usePDPStore((state) => state.input);
   const soldOut = usePDPStore((state) => state.soldOut);
-  const [visible, setVisible] = useState(false);
+  const needsSize = usePDPStore((state) => state.needsSize);
+  // Any overlay (cart, gallery, search…) already covers this control — a
+  // second fixed bar underneath it would be pointless chrome, and on some
+  // overlays would sit visibly on top of the scrim.
+  const overlayOpen = useOverlay() !== null;
+  const [ctaAboveViewport, setCtaAboveViewport] = useState(false);
+  const [nearFooter, setNearFooter] = useState(false);
   const observed = useRef(false);
 
   useEffect(() => {
@@ -52,7 +59,7 @@ export function StickyBuyBar({
         // Show the bar when the primary CTA has scrolled ABOVE the viewport,
         // not when it is merely off screen in either direction.
         const above = (entry?.boundingClientRect.top ?? 0) < 0;
-        setVisible(!entry?.isIntersecting && above);
+        setCtaAboveViewport(!entry?.isIntersecting && above);
       },
       { threshold: 0 },
     );
@@ -60,6 +67,23 @@ export function StickyBuyBar({
     observer.observe(target);
     return () => observer.disconnect();
   }, [watchId]);
+
+  // Once the footer starts entering the viewport the bar would sit on top of
+  // it (or its own links) for the rest of the scroll — hide it there, the
+  // same way it only appears once the real CTA has gone the other way.
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(([entry]) => setNearFooter(Boolean(entry?.isIntersecting)), {
+      threshold: 0,
+    });
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  const visible = ctaAboveViewport && !overlayOpen && !nearFooter;
 
   return (
     <AnimatePresence>
@@ -80,41 +104,36 @@ export function StickyBuyBar({
             </div>
 
             {/*
-              A real ADD TO BAG.
+              A real ADD TO BAG, the same control `PurchasePanel` uses.
 
               It used to be labelled "add to bag" and only scroll — and,
               through an inverted condition, opened the cart when the item was
               SOLD OUT rather than when it had been added. Now it reads the
               selection `PurchasePanel` publishes and adds the same variant the
               panel would, opening the drawer exactly as the primary control
-              does.
-
-              When there is nothing addable yet the button says so instead of
-              lying: with a size still to pick it reads "select a size" and
-              takes you to the picker; when the variant is sold out it is
-              disabled and says sold out.
+              does. With a size still to pick, `needsSize` keeps this a real,
+              clickable button — same contract as the picker above, so this
+              bar never has its own second copy of the scroll-and-focus logic.
             */}
-            {input ? (
-              <AddToBag input={input} size="md" block={false} className="shrink-0 px-6" />
-            ) : (
-              <button
-                type="button"
-                disabled={soldOut}
-                onClick={() => {
-                  const target = document.getElementById(watchId);
-                  target?.scrollIntoView({ block: 'center' });
-                  // Move focus with the scroll, so a keyboard or screen-reader
-                  // user lands on the picker rather than being left behind on a
-                  // button that has just scrolled off screen.
-                  target?.querySelector<HTMLElement>('button:not([disabled])')?.focus({
-                    preventScroll: true,
-                  });
-                }}
-                className="label h-11 shrink-0 rounded-xs bg-paper px-6 text-void transition-colors duration-(--duration-fast) hover:bg-bone active:scale-[0.985] disabled:pointer-events-none disabled:opacity-40"
-              >
-                {soldOut ? t.product.soldOut : t.product.selectSizeFirst}
-              </button>
-            )}
+            <AddToBag
+              input={input}
+              disabled={soldOut}
+              disabledLabel={soldOut ? t.product.soldOut : t.product.selectSizeFirst}
+              size="md"
+              block={false}
+              className="shrink-0 px-6"
+              needsSize={needsSize}
+              onNeedsSizeClick={() => {
+                const target = document.getElementById(watchId);
+                target?.scrollIntoView({ block: 'center' });
+                // Move focus with the scroll, so a keyboard or screen-reader
+                // user lands on the picker rather than being left behind on a
+                // button that has just scrolled off screen.
+                target?.querySelector<HTMLElement>('button:not([disabled])')?.focus({
+                  preventScroll: true,
+                });
+              }}
+            />
           </div>
         </m.div>
       ) : null}

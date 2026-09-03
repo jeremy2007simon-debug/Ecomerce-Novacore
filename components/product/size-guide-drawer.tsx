@@ -44,6 +44,16 @@ export type SizeGuideCopy = {
     result: string;
     demo: string;
   };
+  /**
+   * `trade-pant` is the one product measured by numeric waist rather than
+   * letter size — a second, real table, not a reinterpretation of the
+   * letter one. Everything else (how-to, note, estimator) is shared.
+   */
+  tradePant: {
+    tableLabel: string;
+    columns: readonly string[];
+    rows: readonly { size: string; waist: string; hip: string; inseam: string }[];
+  };
 };
 
 /**
@@ -77,10 +87,13 @@ export function SizeGuideDrawer({
   open,
   onClose,
   copy,
+  formKey = 'apparel',
 }: {
   open: boolean;
   onClose: () => void;
   copy: SizeGuideCopy;
+  /** Which real table to show — letter sizes (default) or trade-pant's numeric waist. */
+  formKey?: 'apparel' | 'trade-pant';
 }) {
   const { t, fmt } = useLocale();
   const heightId = useId();
@@ -90,6 +103,7 @@ export function SizeGuideDrawer({
   const [result, setResult] = useState<string | null>(null);
 
   const canEstimate = Number(height) > 0 && Number(weight) > 0;
+  const isTradePant = formKey === 'trade-pant';
 
   return (
     <Overlay open={open} onClose={onClose} placement="bottom" label={copy.title}>
@@ -106,11 +120,19 @@ export function SizeGuideDrawer({
       </header>
 
       <div className="grow overflow-y-auto overscroll-contain px-5 py-6">
-        <DocumentTable
-          caption={copy.tableLabel}
-          columns={copy.columns}
-          rows={copy.rows.map((row) => [row.size, row.chest, row.waist, row.length, row.sleeve])}
-        />
+        {isTradePant ? (
+          <DocumentTable
+            caption={copy.tradePant.tableLabel}
+            columns={copy.tradePant.columns}
+            rows={copy.tradePant.rows.map((row) => [row.size, row.waist, row.hip, row.inseam])}
+          />
+        ) : (
+          <DocumentTable
+            caption={copy.tableLabel}
+            columns={copy.columns}
+            rows={copy.rows.map((row) => [row.size, row.chest, row.waist, row.length, row.sleeve])}
+          />
+        )}
         <p className="reading mt-6 text-small text-ink-subtle">{copy.note}</p>
 
         <p className="micro-label mt-10 mb-4 text-ink-subtle">{copy.howToLabel}</p>

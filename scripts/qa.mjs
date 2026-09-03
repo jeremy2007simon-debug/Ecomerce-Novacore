@@ -98,7 +98,10 @@ const check = (name, ok, detail = '') => {
   });
 
   await page.goto(`${B}/es/product/atlantic-01`, { waitUntil: 'networkidle' });
-  await page.locator('main').getByRole('button', { name: 'M', exact: true }).first().click();
+  // The size button's accessible name grew a descriptive aria-label in
+  // Phase 5 ("Talla M, disponible", not just "M") — its own text content is
+  // still exactly "M", so match on that instead of the accessible name.
+  await page.locator('main fieldset .grid.gap-2 button', { hasText: /^M$/ }).first().click();
   await page.getByRole('button', { name: /Añadir a la bolsa/i }).first().click();
   await page.waitForTimeout(700);
   await page.keyboard.press('Escape');

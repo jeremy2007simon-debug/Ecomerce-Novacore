@@ -19,6 +19,11 @@ import type { CartInput } from './cart-store';
  *
  * Not persisted, and cleared when the panel unmounts, so a stale selection can
  * never survive a navigation to another product.
+ *
+ * `activeColor` follows the same one-writer pattern for Phase 5's Gallery V2:
+ * `PurchasePanel` is still the sole writer, and `ProductGallery` becomes a
+ * second reader alongside the sticky bar — exactly the "second subscriber"
+ * this store was already built to support, not a new problem to solve.
  */
 interface PDPState {
   /** Non-null only when a complete, purchasable variant is selected. */
@@ -27,15 +32,19 @@ interface PDPState {
   soldOut: boolean;
   /** True when the product has sizes and none has been chosen yet. */
   needsSize: boolean;
+  /** The selected colour option value, or null before a default resolves. */
+  activeColor: string | null;
 
   publish: (selection: { input: CartInput | null; soldOut: boolean; needsSize: boolean }) => void;
+  setActiveColor: (color: string) => void;
   clear: () => void;
 }
 
-const EMPTY = { input: null, soldOut: false, needsSize: false } as const;
+const EMPTY = { input: null, soldOut: false, needsSize: false, activeColor: null } as const;
 
 export const usePDPStore = create<PDPState>()((set) => ({
   ...EMPTY,
   publish: (selection) => set(selection),
+  setActiveColor: (color) => set({ activeColor: color }),
   clear: () => set({ ...EMPTY }),
 }));

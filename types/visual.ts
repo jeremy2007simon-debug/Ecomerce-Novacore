@@ -5,7 +5,7 @@ export type ProductForm = 'shell' | 'overshirt' | 'tee' | 'knit' | 'pant' | 'bag
 export type PaletteKey = 'basalt' | 'ember' | 'atlantic' | 'sail' | 'moss' | 'sand';
 
 /** Where a visual is being used. Drives `sizes` and the intrinsic aspect. */
-export type VisualSlot = 'card' | 'hero' | 'gallery' | 'thumb' | 'bag' | 'feature';
+export type VisualSlot = 'card' | 'hero' | 'gallery' | 'thumb' | 'bag' | 'feature' | 'viewer';
 
 export type MediaAspect = '1/1' | '4/5' | '3/4' | '16/9' | '3/2';
 
@@ -15,12 +15,23 @@ export type MediaAspect = '1/1' | '4/5' | '3/4' | '16/9' | '3/2';
  */
 export interface ImageMedia {
   kind: 'image';
+  /** Stable identity for gallery keys/active-frame tracking — the image URL itself in Shopify mode. */
+  id: string;
   url: string;
   altText: string;
   width: number;
   height: number;
   aspect: MediaAspect;
   blurDataURL?: string;
+  /**
+   * The real option value this frame depicts, when a provider can honestly
+   * attribute one — e.g. demo's per-colorway primary photo/art. Shared
+   * frames (material studies, or any Shopify image today, since the
+   * Storefront query in use carries no variant/image association) leave
+   * this unset. The gallery only filters by colorway when at least one item
+   * in a product's media sets it — see lib/commerce/product-gallery.ts.
+   */
+  colorwayKey?: string;
 }
 
 /**
@@ -41,12 +52,16 @@ export type ProceduralVariant = 'product' | 'material';
  */
 export interface ProceduralMedia {
   kind: 'procedural';
+  /** Stable identity for gallery keys/active-frame tracking — the deterministic seed itself. */
+  id: string;
   seed: string;
   form: ProductForm;
   palette: PaletteKey;
   aspect: MediaAspect;
   variant: ProceduralVariant;
   alt: string;
+  /** See ImageMedia.colorwayKey. */
+  colorwayKey?: string;
 }
 
 export type ProductMedia = ImageMedia | ProceduralMedia;

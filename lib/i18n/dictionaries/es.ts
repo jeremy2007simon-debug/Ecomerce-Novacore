@@ -188,6 +188,7 @@ export const es: Dictionary = {
       returns: 'Devoluciones en 30 días',
       material: 'Material',
       details: 'Detalles',
+      features: 'Características',
       composition: 'Composición',
       weight: 'Peso',
       origin: 'Origen',
@@ -203,6 +204,15 @@ export const es: Dictionary = {
       notFoundTitle: 'Esta pieza ya no existe',
       notFoundBody: 'Puede que se haya retirado o que el enlace sea incorrecto.',
       notFoundCta: 'Ver la colección',
+      technicalSpec: {
+        eyebrow: 'Especificación',
+        title: 'Hecho a ficha',
+        intro: 'Los números exactos detrás de esta pieza: los que se usaron para cortarla, no una versión redondeada.',
+      },
+      completeTheSystem: {
+        eyebrow: 'Pensado para combinar',
+        title: 'Complete the System',
+      },
     },
     reviews: {
       title: 'Opiniones',
@@ -303,6 +313,18 @@ export const es: Dictionary = {
           'Manga: desde el centro del cuello por la espalda hasta el puño.',
         ],
         note: 'Los accesorios y los objetos son de talla única. Si te importa una medida que no está aquí, pregúntanos: las tenemos todas.',
+        tradePant: {
+          tableLabel: 'Trade Pant',
+          columns: ['Cintura', 'Cintura (prenda)', 'Cadera', 'Entrepierna'],
+          rows: [
+            { size: '28', waist: '76 cm', hip: '98 cm', inseam: '78 cm' },
+            { size: '30', waist: '81 cm', hip: '103 cm', inseam: '78 cm' },
+            { size: '32', waist: '86 cm', hip: '108 cm', inseam: '79 cm' },
+            { size: '34', waist: '91 cm', hip: '113 cm', inseam: '79 cm' },
+            { size: '36', waist: '96 cm', hip: '118 cm', inseam: '80 cm' },
+            { size: '38', waist: '101 cm', hip: '123 cm', inseam: '80 cm' },
+          ],
+        },
         estimator: {
           title: '¿No estás seguro? Estímalo',
           body: 'Un punto de partida aproximado a partir de tu altura y peso: no es un algoritmo de ajuste real.',
@@ -503,6 +525,18 @@ export const es: Dictionary = {
       sizeGuide: 'Guía de tallas',
       color: 'Color',
       lowStock: 'Quedan {count}',
+      selected: 'seleccionado',
+      available: 'disponible',
+      selectSizeInline: 'Elige una talla para continuar',
+      shipping: 'Envío',
+      returnsPolicy: 'Devoluciones',
+      secureCheckout: 'Pago seguro',
+    },
+    gallery: {
+      label: 'Galería del producto',
+      counter: '{current} / {total}',
+      previous: 'Imagen anterior',
+      next: 'Imagen siguiente',
     },
     search: {
       placeholder: 'Buscar…',

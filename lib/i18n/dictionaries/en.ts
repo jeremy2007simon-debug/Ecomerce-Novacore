@@ -190,6 +190,7 @@ export const en = {
       returns: '30-day returns',
       material: 'Material',
       details: 'Details',
+      features: 'Features',
       composition: 'Composition',
       weight: 'Weight',
       origin: 'Origin',
@@ -205,6 +206,15 @@ export const en = {
       notFoundTitle: 'This piece no longer exists',
       notFoundBody: 'It may have been retired, or the link may be wrong.',
       notFoundCta: 'View the collection',
+      technicalSpec: {
+        eyebrow: 'Specification',
+        title: 'Built to spec',
+        intro: 'The exact numbers behind this piece — the ones used to cut it, not rounded for a spec sheet.',
+      },
+      completeTheSystem: {
+        eyebrow: 'Wear it together',
+        title: 'Complete the System',
+      },
     },
     reviews: {
       title: 'Reviews',
@@ -305,6 +315,18 @@ export const en = {
           'Sleeve — from the centre back of the collar to the cuff.',
         ],
         note: 'Accessories and hardware are one size. If a measurement matters to you and is not here, ask — we have all of them.',
+        tradePant: {
+          tableLabel: 'Trade Pant',
+          columns: ['Waist', 'Waist (garment)', 'Hip', 'Inseam'],
+          rows: [
+            { size: '28', waist: '76 cm', hip: '98 cm', inseam: '78 cm' },
+            { size: '30', waist: '81 cm', hip: '103 cm', inseam: '78 cm' },
+            { size: '32', waist: '86 cm', hip: '108 cm', inseam: '79 cm' },
+            { size: '34', waist: '91 cm', hip: '113 cm', inseam: '79 cm' },
+            { size: '36', waist: '96 cm', hip: '118 cm', inseam: '80 cm' },
+            { size: '38', waist: '101 cm', hip: '123 cm', inseam: '80 cm' },
+          ],
+        },
         estimator: {
           title: 'Not sure? Estimate it',
           body: 'A rough starting point from height and weight — not a real fit algorithm.',
@@ -505,6 +527,18 @@ export const en = {
       sizeGuide: 'Size guide',
       color: 'Colour',
       lowStock: 'Only {count} left',
+      selected: 'selected',
+      available: 'available',
+      selectSizeInline: 'Select a size to continue',
+      shipping: 'Shipping',
+      returnsPolicy: 'Returns',
+      secureCheckout: 'Secure checkout',
+    },
+    gallery: {
+      label: 'Product gallery',
+      counter: '{current} / {total}',
+      previous: 'Previous image',
+      next: 'Next image',
     },
     search: {
       placeholder: 'Search…',

@@ -48,23 +48,27 @@ function buildMedia(product: DemoProduct, colorway: DemoColorway, locale: Locale
   if (photo) {
     return {
       kind: 'image',
+      id: `${product.handle}:${colorway.key}`,
       url: photo.file,
       altText: alt,
       width: photo.width,
       height: photo.height,
       aspect: '4/5',
       blurDataURL: photo.blurDataURL,
+      colorwayKey: colorway.key,
     };
   }
 
   return {
     kind: 'procedural',
+    id: `${product.handle}:${colorway.key}`,
     seed: `${product.handle}:${colorway.key}`,
     form: product.form,
     palette: colorway.palette,
     aspect: '4/5',
     variant: 'product',
     alt,
+    colorwayKey: colorway.key,
   };
 }
 
@@ -77,6 +81,7 @@ function buildGallery(product: DemoProduct, locale: Locale): ProductMedia[] {
   const editorial: ProductMedia[] = [
     {
       kind: 'procedural',
+      id: `${product.handle}:material-a`,
       seed: `${product.handle}:material-a`,
       form: product.form,
       palette: product.colorways[0]?.palette ?? 'basalt',
@@ -86,9 +91,11 @@ function buildGallery(product: DemoProduct, locale: Locale): ProductMedia[] {
         locale === 'es'
           ? `Macro del tejido de ${product.title}`
           : `Fabric macro of ${product.title}`,
+      // No colorwayKey — shared across every colorway, never filtered out.
     },
     {
       kind: 'procedural',
+      id: `${product.handle}:material-b`,
       seed: `${product.handle}:material-b`,
       form: product.form,
       palette: product.colorways[1]?.palette ?? 'sand',

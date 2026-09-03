@@ -16,7 +16,16 @@ import type { Product } from '@/types/commerce';
  * because there is nowhere to store that state.
  */
 
-export type OverlayId = 'cart' | 'search' | 'menu' | 'megamenu' | 'assistant' | 'quickadd' | 'filters' | 'sort';
+export type OverlayId =
+  | 'cart'
+  | 'search'
+  | 'menu'
+  | 'megamenu'
+  | 'assistant'
+  | 'quickadd'
+  | 'filters'
+  | 'sort'
+  | 'gallery';
 
 export type QuickAddSurface = 'home' | 'collection';
 

@@ -47,17 +47,18 @@ for (const vp of VPS) {
       const r = (el) => el.getBoundingClientRect();
       const out = { h: location.pathname.split('/').pop() };
 
-      // 1 + 2 — gallery
+      // 1 — Gallery V2's mobile/tablet strip: `fill` mode against a fixed
+      // `--gal-h` means every frame MUST share one height, none wider than
+      // the screen. The retired EditorialGallery's separate checks (a Rule
+      // heading above a full-bleed scroller, per-frame figcaptions) no
+      // longer apply — the gallery now opens the page directly inside the
+      // sticky hero column, with no heading above it and no visible caption
+      // per frame (the accessible name is the button's aria-label).
       const scroller = document.querySelector('[data-scroll-snap]');
       if (scroller) {
-        const figs = [...scroller.querySelectorAll('figure')];
-        out.frameH = figs.map(f => Math.round(r(f.querySelector('.pv-shell')).height));
-        out.frameW = figs.map(f => Math.round(r(f).width));
-        out.capTop = figs.map(f => Math.round(r(f.querySelector('figcaption')).top));
-        out.scrollerPadL = Math.round(parseFloat(getComputedStyle(scroller).paddingLeft));
-        const rule = document.querySelector('section[aria-label] .editorial');
-        out.ruleLeft = rule ? Math.round(r(rule.firstElementChild ?? rule).left) : null;
-        out.firstFrameLeft = figs[0] ? Math.round(r(figs[0]).left) : null;
+        const frames = [...scroller.querySelectorAll(':scope > button')];
+        out.frameH = frames.map(f => Math.round(r(f.querySelector('.pv-shell')).height));
+        out.frameW = frames.map(f => Math.round(r(f).width));
       }
 
       // 3 — feature scene: ticks vs captions vs sticky bar
@@ -101,7 +102,7 @@ for (const vp of VPS) {
       const rev = document.getElementById('reviews');
       if (rev) out.reviewsH = Math.round(r(rev).height);
       const rel = [...document.querySelectorAll('section')].find(s =>
-        getComputedStyle(s).containIntrinsicSize.includes('900px'));
+        getComputedStyle(s).containIntrinsicSize.includes('1200px'));
       if (rel) out.relatedH = Math.round(r(rel).height);
 
       // size grid
@@ -119,11 +120,7 @@ for (const vp of VPS) {
     if (m.frameH?.length) {
       const uniq = [...new Set(m.frameH)];
       if (uniq.length > 1) bad(`${handle} gallery heights differ: ${m.frameH.join(',')}`);
-      const capUniq = [...new Set(m.capTop)];
-      if (capUniq.length > 1) bad(`${handle} caption tops differ: ${m.capTop.join(',')}`);
       if (m.frameW.some(w => w > vp.w)) bad(`${handle} frame wider than screen: ${m.frameW.join(',')}`);
-      if (m.ruleLeft != null && Math.abs(m.firstFrameLeft - m.ruleLeft) > 2)
-        bad(`${handle} gallery/Rule misaligned: frame ${m.firstFrameLeft} vs rule ${m.ruleLeft}`);
     }
     if (m.h1w > m.colw) bad(`${handle} h1 overflows column: ${m.h1w} > ${m.colw}`);
     if (m.overflow > 0) bad(`${handle} horizontal overflow +${m.overflow}`);
@@ -131,7 +128,7 @@ for (const vp of VPS) {
 
     if (handle === 'atlantic-01' || handle === 'atlantic-bottle') {
       console.log(`  ${handle}: h1 ${m.h1w}/${m.colw}@${m.h1fs}px · frames ${m.frameH?.join(',')} · ` +
-        `galL ${m.firstFrameLeft}/rule ${m.ruleLeft} · specCols ${m.specCols}@${m.specW} lastW ${m.specLastW} · ` +
+        `specCols ${m.specCols}@${m.specW} lastW ${m.specLastW} · ` +
         `sizeCols ${m.sizeCols}@${m.sizeBtnW} · avg ${m.avgFs}px/dist ${m.distH} · ` +
         `featCol ${m.featColH} stack ${m.stackH} padB ${m.colPadBottom} · reviews ${m.reviewsH} related ${m.relatedH}`);
     }

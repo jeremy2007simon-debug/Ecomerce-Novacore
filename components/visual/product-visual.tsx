@@ -54,6 +54,8 @@ const SLOT_SIZES: Record<VisualSlot, string> = {
   card: '(max-width: 640px) 44vw, (max-width: 1023px) 44vw, 23vw',
   thumb: '96px',
   bag: '88px',
+  /** The fullscreen gallery viewer — genuinely full-bleed, capped by the frame's own max-width. */
+  viewer: '90vw',
 };
 
 const ASPECT_CLASS: Record<MediaAspect, string> = {

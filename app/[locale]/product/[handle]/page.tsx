@@ -2,40 +2,44 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { Reveal, RevealText } from '@/components/motion';
+import { RevealText } from '@/components/motion';
 import { AskAtlantic } from '@/components/product/ask-atlantic/ask-atlantic';
-import { DetailsAccordion, SpecTable } from '@/components/product/details-accordion';
-import { EditorialGallery } from '@/components/product/editorial-gallery';
+import { CompleteTheSystem } from '@/components/product/complete-the-system';
+import { DetailsAccordion } from '@/components/product/details-accordion';
 import { FeatureProgression } from '@/components/product/feature-progression';
+import { ProductGallery, type ProductGalleryCopy } from '@/components/product/product-gallery';
+import { ProductStory } from '@/components/product/product-story';
 import { PurchasePanel } from '@/components/product/purchase-panel';
 import { RelatedProducts } from '@/components/product/related-products';
 import { ReviewList } from '@/components/product/reviews/review-list';
 import { ReviewSummaryPanel } from '@/components/product/reviews/review-summary';
 import { Stars } from '@/components/product/reviews/stars';
+import { TechnicalSpecSection } from '@/components/product/technical-spec-section';
 import { StickyBuyBar } from '@/components/commerce/sticky-buy-bar';
 import { Price } from '@/components/commerce/price';
 import { Eyebrow } from '@/components/ui/eyebrow';
 import { Rule } from '@/components/ui/rule';
 import { MaterialMacro } from '@/components/visual/material-macro';
-import { ProductVisual } from '@/components/visual/product-visual';
 import { commerce } from '@/lib/commerce';
+import { getDefaultColor } from '@/lib/commerce/product-gallery';
 import { getClientDictionary, getServerDictionary } from '@/lib/i18n/get-dictionary';
 import { buildProductCardCopy } from '@/lib/i18n/product-card-copy';
 import { breadcrumbJsonLd, productJsonLd } from '@/lib/seo/json-ld';
 import { routes } from '@/lib/utils/routes';
 import { isLocale, LOCALES } from '@/types/i18n';
+import type { Product } from '@/types/commerce';
 
 /**
  * PRODUCT PAGE.
  *
- * Not "image left, information right, buy button". The sequence is:
+ * fullscreen gallery + commerce panel  →  progressive features (sticky)
+ * →  material  →  technical specification  →  product story  →  details
+ * →  reviews  →  complete the system  →  recommendations  →  ask atlantic
  *
- *   fullscreen product  →  progressive features (sticky)  →  editorial gallery
- *   →  material  →  details  →  reviews  →  recommendations  →  ask atlantic
- *
- * Only the purchase panel, the assistant and the review list are client
- * components. Everything else — including the entire feature scene's content —
- * is server-rendered and passes through the scroll primitives as children.
+ * Only the gallery, the purchase panel, the assistant and the review list are
+ * client components. Everything else — including the entire feature scene's
+ * content — is server-rendered and passes through the scroll primitives as
+ * children.
  */
 
 /*
@@ -72,6 +76,9 @@ export async function generateMetadata({
     title: product.seo.title,
     description: product.seo.description,
     alternates: {
+      // No `?color=` in the canonical — a colour pick is a display
+      // preference within one product, not a distinct piece of content;
+      // including it would read as duplicate-content variants to a crawler.
       canonical: `/${locale}/product/${handle}`,
       languages: {
         'es-ES': `/es/product/${handle}`,
@@ -108,14 +115,51 @@ export default async function ProductPage({
   const productCardCopy = buildProductCardCopy(t, clientT);
 
   const hero = product.media[0]!;
-  const galleryMedia = product.media.slice(1);
+
+  // The default colour's variant, for the header price — fixes a real bug:
+  // `basalt-knit` has a genuine `compareAtPrice` that never showed on its own
+  // page because this line always read `priceRange.min`, which carries no
+  // compareAt. This is deliberately NOT `?color=`-aware (see PurchasePanel's
+  // doc comment on why that restore is client-side only) — price does not
+  // vary by size in this catalogue, so the default colour's variant is
+  // already correct for every load, before any client-side colour restore.
+  const initialVariant =
+    product.variants.find((variant) =>
+      variant.selectedOptions.some(
+        (option) => option.name === 'color' && option.value === getDefaultColor(product),
+      ),
+    ) ?? product.variants[0];
 
   const detailSections = [
     { title: t.product.composition, body: product.metafields.composition },
     { title: t.product.care, items: product.metafields.care },
+    {
+      title: t.product.features,
+      items: product.metafields.features.map((feature) => `${feature.label} — ${feature.detail}`),
+    },
     { title: t.product.shipping, body: product.metafields.shipping },
     { title: t.product.returnsPolicy, body: product.metafields.returns },
   ];
+
+  const galleryCopy: ProductGalleryCopy = {
+    label: clientT.gallery.label,
+    counter: clientT.gallery.counter,
+    previous: clientT.gallery.previous,
+    next: clientT.gallery.next,
+    close: clientT.common.close,
+  };
+
+  // Real, curated cross-sell (`metafields.pairsWith`), resolved against the
+  // catalogue already fetched for Ask Atlantic below — no extra request.
+  // Recommendations is filtered against the same set so the two sections
+  // never show the same product twice on one page.
+  const completeTheSystemProducts = product.metafields.pairsWith
+    .map((pairHandle) => catalogue.nodes.find((candidate) => candidate.handle === pairHandle))
+    .filter((candidate): candidate is Product => Boolean(candidate));
+  const completeTheSystemHandles = new Set(completeTheSystemProducts.map((candidate) => candidate.handle));
+  const dedupedRecommendations = recommendations.filter(
+    (entry) => !completeTheSystemHandles.has(entry.product.handle),
+  );
 
   return (
     <main id="main">
@@ -142,19 +186,22 @@ export default async function ProductPage({
       {/* ── OPENING: the product, large, with the essentials ─────────────── */}
       <section className="editorial grid gap-12 pt-28 pb-(--spacing-section) lg:grid-cols-2 lg:gap-20 lg:pt-36">
         {/*
-          `top-20` matches the 64px header plus a little air, and agrees with the
-          5rem `scroll-padding-top` in globals.css — previously this said
-          `top-24` and there were three different values for the same clearance.
-
-          The height guard matters: this column is 4/5 of a 544px track, i.e.
-          680px tall. Pinned 96px down that needs a 776px viewport, so on a
-          1440x768 laptop the bottom of the image could never be scrolled into
-          view. Capping at the space actually available keeps it whole.
+          `top-[calc(var(--header-height)+1.5rem)]` matches the header plus a
+          little air, and agrees with the 5rem `scroll-padding-top` in
+          globals.css. Both columns are sticky now, not just the gallery: the
+          gallery can run taller than one screen (main frame plus a grid of
+          supporting frames), and pinning the purchase panel too keeps it
+          reachable without scrolling back up while the gallery scrolls past.
         */}
-        <div className="lg:sticky lg:top-20 lg:self-start">
-          <div className="lg:max-h-[calc(100svh-7rem)] lg:overflow-clip lg:rounded-xs">
-            <ProductVisual media={hero} slot="hero" priority />
-          </div>
+        {/*
+          `min-w-0`: without it, this grid item's width defaults to its
+          content's min-content size — and the mobile gallery strip's
+          `overflow-x-auto` track does not shrink that min-content the way it
+          visually clips the box, so the column (and the page) rendered
+          ~1148px wide on a 390px viewport before this was added.
+        */}
+        <div className="min-w-0 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:self-start">
+          <ProductGallery product={product} copy={galleryCopy} />
         </div>
 
         {/*
@@ -162,7 +209,7 @@ export default async function ProductPage({
           headline below can be sized against the COLUMN rather than the
           viewport. See the h1 for why that is necessary.
         */}
-        <div className="@container flex flex-col">
+        <div className="@container flex flex-col lg:sticky lg:top-[calc(var(--header-height)+1.5rem)] lg:self-start">
           <nav aria-label="Breadcrumb" className="mb-8">
             <Link href={routes.collection(locale)} className="micro-label text-ink-subtle hover:text-ink">
               {t.collection.title}
@@ -195,7 +242,12 @@ export default async function ProductPage({
           <p className="mt-4 text-subtitle text-ink-muted">{product.subtitle}</p>
 
           <div className="mt-7 flex items-center gap-5">
-            <Price value={product.priceRange.min} locale={locale} size="title" />
+            <Price
+              value={initialVariant?.price ?? product.priceRange.min}
+              compareAt={initialVariant?.compareAtPrice}
+              locale={locale}
+              size="title"
+            />
             <Link href="#reviews" className="flex items-center gap-2.5">
               <Stars value={product.rating.value} size={13} />
               <span className="micro-label text-ink-subtle" data-numeric>
@@ -220,28 +272,31 @@ export default async function ProductPage({
         label={t.product.details}
       />
 
-      {/* ── GALLERY ──────────────────────────────────────────────────────── */}
-      <EditorialGallery media={galleryMedia} label={t.product.gallery} />
-
-      {/* ── MATERIAL ─────────────────────────────────────────────────────── */}
+      {/* ── MATERIAL: a short chapter beat naming what it's made of ───────── */}
       <section className="relative isolate overflow-clip border-y border-hairline py-(--spacing-section)">
         <MaterialMacro
           seed={`${product.handle}-macro`}
           className="absolute inset-0 -z-10 opacity-35"
         />
-        <div className="editorial grid gap-14 lg:grid-cols-2 lg:gap-20">
-          <div>
-            <Eyebrow>{t.product.material}</Eyebrow>
-            <RevealText as="h2" className="text-headline mt-8 font-medium text-ink" split="none">
-              {product.metafields.material}
-            </RevealText>
-            <p className="reading mt-8 text-body text-ink-muted">{product.metafields.story}</p>
-          </div>
-          <Reveal delay={0.1}>
-            <SpecTable specs={product.metafields.specs} label={t.product.specifications} />
-          </Reveal>
+        <div className="editorial">
+          <Eyebrow>{t.product.material}</Eyebrow>
+          <RevealText as="h2" className="text-headline mt-8 font-medium text-ink" split="none">
+            {product.metafields.material}
+          </RevealText>
         </div>
       </section>
+
+      {/* ── TECHNICAL SPECIFICATION ─────────────────────────────────────── */}
+      <TechnicalSpecSection specs={product.metafields.specs} copy={t.product.technicalSpec} />
+
+      {/* ── PRODUCT STORY ────────────────────────────────────────────────── */}
+      <ProductStory
+        handle={product.handle}
+        title={product.title}
+        story={product.metafields.story}
+        locale={locale}
+        copy={{ eyebrow: t.product.story }}
+      />
 
       {/* ── DETAILS ──────────────────────────────────────────────────────── */}
       <section className="editorial py-(--spacing-section)">
@@ -284,9 +339,12 @@ export default async function ProductPage({
         </div>
       </section>
 
+      {/* ── COMPLETE THE SYSTEM ─────────────────────────────────────────── */}
+      <CompleteTheSystem products={completeTheSystemProducts} locale={locale} copy={t.product.completeTheSystem} />
+
       {/* ── RECOMMENDATIONS ──────────────────────────────────────────────── */}
       <RelatedProducts
-        recommendations={recommendations}
+        recommendations={dedupedRecommendations}
         locale={locale}
         copy={t.product}
         productCardCopy={productCardCopy}

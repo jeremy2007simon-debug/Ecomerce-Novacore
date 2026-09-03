@@ -24,6 +24,12 @@ import { cn } from '@/lib/utils/cn';
  *
  * There is no artificial delay. The 420ms before the label reverts exists only
  * so the tick is perceivable; the cart is updated synchronously on click.
+ *
+ * `needsSize` is a real, clickable state, not a disabled one: a shopper who
+ * has not picked a size yet still gets a working button that shows them where
+ * to go, via `onNeedsSizeClick`, rather than a dead `disabled` control they
+ * have to figure out on their own. Only `disabled` (sold out) removes the
+ * native `disabled` attribute's actual click-blocking — never `needsSize`.
  */
 export function AddToBag({
   input,
@@ -33,6 +39,8 @@ export function AddToBag({
   block = true,
   openDrawer = true,
   surface = 'pdp',
+  needsSize = false,
+  onNeedsSizeClick,
   className,
 }: {
   input: CartInput | null;
@@ -43,6 +51,10 @@ export function AddToBag({
   openDrawer?: boolean;
   /** Where this button lives, for add_to_cart attribution. */
   surface?: 'pdp' | 'home' | 'collection';
+  /** True while the product has sizes and none is selected — see the note above. */
+  needsSize?: boolean;
+  /** Called instead of adding, when `needsSize` is true and the shopper clicks anyway. */
+  onNeedsSizeClick?: () => void;
   className?: string;
 }) {
   const { t, locale } = useLocale();
@@ -52,9 +64,15 @@ export function AddToBag({
   const open = useUIStore((state) => state.open);
   const [added, setAdded] = useState(false);
 
-  const isDisabled = disabled || input === null;
+  // Only a genuinely sold-out variant blocks the click structurally.
+  // `needsSize` shows the same fallback label but stays a real button.
+  const showsFallbackLabel = disabled || input === null;
 
   const handleClick = () => {
+    if (needsSize && !disabled) {
+      onNeedsSizeClick?.();
+      return;
+    }
     if (!input) return;
 
     if (isDemoMode) {
@@ -77,7 +95,7 @@ export function AddToBag({
       variant="solid"
       size={size}
       block={block}
-      disabled={isDisabled}
+      disabled={disabled}
       onClick={handleClick}
       className={cn('relative overflow-hidden', className)}
       aria-live="polite"
@@ -104,7 +122,7 @@ export function AddToBag({
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
           >
-            {isDisabled ? (disabledLabel ?? t.product.soldOut) : t.product.addToBag}
+            {showsFallbackLabel ? (disabledLabel ?? t.product.soldOut) : t.product.addToBag}
           </m.span>
         )}
       </AnimatePresence>

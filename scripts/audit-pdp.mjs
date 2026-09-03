@@ -33,13 +33,17 @@ for (const vp of VPS) {
 
     const m = await page.evaluate(() => {
       const out = {};
-      // Gallery figures: same width row => heights must match unless intentional
-      const figs = [...document.querySelectorAll('figure')];
+      // Gallery V2's mobile/tablet strip (`[data-scroll-snap]`, `lg:hidden`) uses
+      // `fill` mode against a fixed `--gal-h`, so every frame in it MUST share
+      // one height by construction — that invariant is what this checks. The
+      // desktop hero+grid arrangement intentionally varies height per frame's
+      // own aspect ratio (a landscape supporting shot is legitimately shorter
+      // than the hero), so it has nothing comparable to assert here; on a
+      // desktop viewport the strip is hidden and this naturally reports empty.
+      const figs = [...document.querySelectorAll('[data-scroll-snap] .pv-shell')];
       out.gallery = figs.map(f => {
         const r = f.getBoundingClientRect();
-        const img = f.querySelector('.pv-shell');
-        const ir = img?.getBoundingClientRect();
-        return { w: Math.round(r.width), h: Math.round(ir?.height ?? 0) };
+        return { w: Math.round(r.width), h: Math.round(r.height) };
       });
       // Any element wider than its parent (a real clipping/misfit signal)
       const escapes = [];

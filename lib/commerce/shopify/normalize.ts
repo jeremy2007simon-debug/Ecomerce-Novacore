@@ -116,6 +116,11 @@ function nearestAspect(width: number, height: number): MediaAspect {
 export function normalizeImage(image: ShopifyImage, productTitle: string): ImageMedia {
   return {
     kind: 'image',
+    // Shopify CDN URLs are stable and unique per image node — no new query
+    // field needed. No colorwayKey: the Storefront fields already queried
+    // here carry no variant/option association, and inventing one would
+    // misattribute a shared image to a single colour.
+    id: image.url,
     url: image.url,
     altText: image.altText ?? productTitle,
     width: image.width,
